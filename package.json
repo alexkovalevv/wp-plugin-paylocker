@@ -1,0 +1,81 @@
+{
+  "assemblies": {
+    "__global__": {
+      "delete": [
+        "/libs/onepress/compiler",
+        "compiler.ini",
+        "package.json",
+        "node_modules",
+        "Gruntfile.js",
+        "/sr/"
+      ]
+    },
+    "build": {
+      "free": {
+        "delete": [
+          "advanced-options.php",
+          "visability-options.php",
+          "/libs/onepress/admixture",
+          "addons"
+        ]
+      },
+      "premium": {
+        "delete": [
+          "more-features.php",
+          "addons"
+        ]
+      },
+      "ultimate": {
+        "delete": ["more-features.php"]
+      },
+      "offline": {
+        "extends": "premium"
+      }
+    },
+    "lang": {
+      "en_US": {
+        "delete": [
+          "/lang",
+          "ru_RU",
+          "tr_TR"
+        ]
+      },
+      "ru_RU": {
+        "delete": ["en_US"]
+      },
+      "tr_TR": {
+        "delete": ["ru_RU"]
+      }
+    }
+  },
+  "constants": {
+    "var": "paylocker",
+    "version": "1.0.0",
+    "api": "http://api.byonepress.com/1.1/",
+    "paylocker": [
+      {
+        "value": "Платный контент | BizPanda"
+      }
+    ],
+    "name": [
+      {
+        "value": "paylocker-rus"
+      }
+    ],
+    "purchaseUrl": [
+      {
+        "value": "http://sociallocker.ru"
+      }
+    ],
+    "pluginUrl": [
+      {
+        "value": "http://sociallocker.ru?utm_source=plugin&utm_medium=plugin-uri&utm_campaign=plugin-uri"
+      }
+    ],
+    "description": [
+      {
+        "value": "Социальный Замок скрывает часть контента на вашем сайте, пока пользователь не нажмет на одну из предложенных социальных кнопок. Начните наконец привлекать посетителей из социальных сетей! Вы ведь хотите больше зарабатывать на рекламе? Генерировать больше продаж? Социальный Замок  - это надежное решение, которое позволяет пользователям \"заплатить лайком\" за доступ к вашему контенту. Англоязычная версия плагина уже более года успешно используется более чем на 10 000 зарубежных сайтов и широко применяется в социальном маркетинге."
+      }
+    ]
+  }
+}
