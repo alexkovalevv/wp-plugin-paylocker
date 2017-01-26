@@ -12,6 +12,10 @@
 	// Constatns & Resources
 	//
 
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	//error_reporting(E_ALL);
+
 	if( defined('PAYLOCKER_PLUGIN_ACTIVE') ) {
 		return;
 	}
@@ -84,7 +88,6 @@
 	 */
 	function onp_pl_init_bizpanda($activationHook = false)
 	{
-
 		/**
 		 * Displays a note about that it's requited to update other plugins.
 		 */
@@ -95,36 +98,28 @@
 		// enabling features the plugin requires
 
 		BizPanda::enableFeature('lockers');
-		BizPanda::enableFeature('terms');
-		BizPanda::enableFeature('social');
-
-		/*if( !onp_build('free') ) {
-			BizPanda::enableFeature('linkedin');
-			BizPanda::enableFeature('sociallocker-premium');
-		}*/
+		BizPanda::enableFeature('payment');
 
 		// creating the plugin object
-
 		global $paylocker;
 
 		$paylocker = new Factory000_Plugin(__FILE__, array(
-			'name' => 'sociallocker-rus',
+			'name' => 'paylocker',
 			'title' => __('Платный контент', 'bizpanda'),
 			'version' => '1.0.0',
 			'assembly' => BUILD_TYPE,
 			'lang' => LANG_TYPE,
-			'api' => 'http://api.sociallocker.ru/1.1/',
-			'premium' => 'https://sociallocker.ru/download/#sociallocker-purchase-anchor',
-			'styleroller' => 'http://sociallocker.ru/styleroller',
-			'support' => 'https://sociallocker.ru/create-ticket/',
-			'account' => 'http://accounts.sociallocker.ru',
+			'api' => 'http://api.byonepress.com/1.1/',
+			'premium' => 'http://api.byonepress.com/public/1.0/get/?product=sociallocker-next',
+			'styleroller' => 'http://sociallocker.org/styleroller',
+			'account' => 'http://accounts.byonepress.com/',
 			'updates' => PAYLOCKER_DIR . '/plugin/updates/',
 			'tracker' => /*@var:tracker*/
 				'0900124461779baebd4e030b813535ac'/*@*/,
 			'childPlugins' => array('bizpanda')
 		));
 
-		BizPanda::registerPlugin($paylocker, 'sociallocker', 'premium');
+		BizPanda::registerPlugin($paylocker, 'paylocker', 'premium');
 
 		// requires factory modules
 		$paylocker->load(array(
@@ -135,9 +130,8 @@
 			array('bizpanda/libs/onepress/updates', 'onp_updates_000')
 		));
 
-		require(SOCIALLOCKER_DIR . '/panda-items/signin-locker/boot.php');
-		require(SOCIALLOCKER_DIR . '/panda-items/social-locker/boot.php');
-		require(SOCIALLOCKER_DIR . '/plugin/boot.php');
+		require(PAYLOCKER_DIR . '/panda-items/pay-locker/boot.php');
+		require(PAYLOCKER_DIR . '/plugin/boot.php');
 	}
 
 	add_action('bizpanda_init', 'onp_pl_init_bizpanda');
@@ -173,3 +167,6 @@
 	if( is_admin() && defined('OPANDA_ACTIVE') ) {
 		bizpanda_validate(PAYLOCKER_BIZPANDA_VERSION, 'Social Locker');
 	}
+
+	// todo: удалить дополнение для публичной версии
+	require(PAYLOCKER_DIR . '/addons/wp-lockers-interrelation/lockers-interrelation.php');

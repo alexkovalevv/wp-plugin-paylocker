@@ -1,0 +1,78 @@
+/**
+ * Стали генератора тарифных таблиц
+ * @author Alex Kovalev <alex.kovalevv@gmail.com> 
+ * @copyright Alex Kovalev 15.12.2016 
+ */
+
+#Opanda_PricingTablesMetabox {
+  display: block;
+
+  .onp-pl-pg-tables {
+    margin-bottom: 20px;
+
+    .onp-pl-pg-tables-item {
+      position: relative;
+      display: inline-block;
+      width: 49%;
+      padding: 40px 50px 40px 20px;
+      // margin-right: 20px;
+      //min-width: 450px;
+      min-height: 200px;
+      border: 1px dashed #d0d0d0;
+      vertical-align: top;
+
+      .onp-pl-pg-delete-table-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 8px;
+      }
+
+      .onp-pl-pg-move-table {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        height: 14px;
+        width: 14px;
+        background: url('../img/drag.png') no-repeat;
+        cursor: move;
+      }
+
+      table {
+        margin: 0;
+        width: 100%;
+        td {
+          padding: 5px 0;
+          &:first-child {
+            padding-right: 10px;
+          }
+          input, select {
+            max-width: 250px;
+          }
+        }
+      }
+
+    }
+    .onp-pl-pg-tables-separator {
+      width: 98%;
+      min-height: 50px;
+      text-align: center;
+      padding: 10px;
+      line-height: 2;
+      margin: 3px 0 6px;
+    }
+  }
+
+  .factory-bootstrap-000 .sortable-placeholder {
+    display: inline-block;
+    height: 348px;
+    width: 49%;
+
+    &.separator {
+      display: block;
+      height: 48px;
+      width: 98%;
+    }
+  }
+}
+

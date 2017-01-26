@@ -1,0 +1,67 @@
+/**
+ * Стали генератора тарифных таблиц
+ * @author Alex Kovalev <alex.kovalevv@gmail.com> 
+ * @copyright Alex Kovalev 15.12.2016 
+ */
+#Opanda_PricingTablesMetabox {
+  display: block;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables {
+  margin-bottom: 20px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item {
+  position: relative;
+  display: inline-block;
+  width: 49%;
+  padding: 40px 50px 40px 20px;
+  min-height: 200px;
+  border: 1px dashed #d0d0d0;
+  vertical-align: top;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-delete-table-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-move-table {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  height: 14px;
+  width: 14px;
+  background: url('../img/drag.png') no-repeat;
+  cursor: move;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table {
+  margin: 0;
+  width: 100%;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td {
+  padding: 5px 0;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td:first-child {
+  padding-right: 10px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td input,
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td select {
+  max-width: 250px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-separator {
+  width: 98%;
+  min-height: 50px;
+  text-align: center;
+  padding: 10px;
+  line-height: 2;
+  margin: 3px 0 6px;
+}
+#Opanda_PricingTablesMetabox .factory-bootstrap-000 .sortable-placeholder {
+  display: inline-block;
+  height: 348px;
+  width: 49%;
+}
+#Opanda_PricingTablesMetabox .factory-bootstrap-000 .sortable-placeholder.separator {
+  display: block;
+  height: 48px;
+  width: 98%;
+}

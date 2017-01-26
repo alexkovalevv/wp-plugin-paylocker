@@ -21,8 +21,7 @@
       },
       "premium": {
         "delete": [
-          "more-features.php",
-          "addons"
+          "more-features.php"
         ]
       },
       "ultimate": {
@@ -59,7 +58,7 @@
     ],
     "name": [
       {
-        "value": "paylocker-rus"
+        "value": "paylocker"
       }
     ],
     "purchaseUrl": [
