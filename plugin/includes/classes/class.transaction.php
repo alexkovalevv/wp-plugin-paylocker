@@ -113,7 +113,7 @@
 
 					$premium = new OnpPl_PremiumSubscriber($userId);
 
-					if( !$premium->updateUserPremium($tableExpired, $transaction['locker_id']) ) {
+					if( !$premium->addUserPremium($tableExpired, $transaction['locker_id']) ) {
 						self::transactionCancel($transactionId);
 						throw new Exception(__("Ошибка обновления премиум подписки.", "bizpanda"));
 					}

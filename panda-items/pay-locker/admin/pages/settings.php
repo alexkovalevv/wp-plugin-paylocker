@@ -41,7 +41,7 @@
 			$options = array();
 		}
 
-		$options = array(
+		$options[] = array(
 			'type' => 'form-group',
 			'name' => 'paylocker-payment-form',
 			'title' => __('Форма оплаты', 'bizpanda'),

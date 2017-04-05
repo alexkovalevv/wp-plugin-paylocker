@@ -15,6 +15,7 @@
 			$options['ajax'] = false;
 
 			parent::__construct($options);
+			$this->bulk_delete();
 		}
 
 
@@ -44,9 +45,44 @@
 			if( current_user_can('administrator') ) {
 				$columns['user_name'] = __('Имя пользователя', 'bizpanda');
 				$columns['locker_title'] = __('Заголовок замка', 'bizpanda');
+				$columns['actions'] = __('Действия', 'bizpanda');
+				$columns = array('cb' => '<input type="checkbox" />') + $columns;
 			}
 
 			return $columns;
+		}
+
+		public function get_bulk_actions()
+		{
+			$actions = array(
+				'delete' => __('Удалить')
+			);
+
+			return $actions;
+		}
+
+		/**
+		 * Checks and runs the bulk action 'delete'.
+		 */
+		public function bulk_delete()
+		{
+			global $wpdb;
+			$action = $this->current_action();
+			if( 'delete' !== $action ) {
+				return;
+			}
+			if( empty($_POST['onp_pl_products']) ) {
+				return;
+			}
+			$ids = array();
+			foreach($_POST['onp_pl_products'] as $productsIds) {
+				$productsIds = explode('-', $productsIds);
+				if( sizeof($productsIds) !== 3 ) {
+					continue;
+				}
+
+				$wpdb->query("DELETE FROM {$wpdb->prefix}opanda_pl_purchased_posts WHERE user_id='" . $productsIds[0] . "' and locker_id='" . $productsIds[1] . "' and post_id='" . $productsIds[2] . "'");
+			}
 		}
 
 		function prepare_items()
@@ -93,6 +129,17 @@
 			));
 
 			$this->items = $wpdb->get_results($query);
+		}
+
+		/**
+		 * Shows a checkbox.
+		 *
+		 * @since 1.0.7
+		 * @return void
+		 */
+		public function column_cb($record)
+		{
+			echo sprintf('<input type="checkbox" name="onp_pl_products[]" value="%s" />', $record->user_id . '-' . $record->locker_id . '-' . $record->post_id);
 		}
 
 		/**
@@ -167,14 +214,7 @@
 		 */
 		public function column_price($record)
 		{
-			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
-			$transaction = OnpPl_Transactions::getTransaction($record->transaction_id);
-
-			if( empty($transaction) ) {
-				return;
-			}
-
-			echo $transaction['table_price'] . ' руб.';
+			echo $record->price . ' руб.';
 		}
 
 		/**
@@ -185,14 +225,7 @@
 		{
 			$output = '';
 
-			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
-			$transaction = OnpPl_Transactions::getTransaction($record->transaction_id);
-
-			if( empty($transaction) ) {
-				return;
-			}
-
-			$post = get_post($transaction['locker_id']);
+			$post = get_post($record->locker_id);
 
 			if( !empty($post) ) {
 				$postUrl = get_edit_post_link($post->ID);
@@ -211,6 +244,12 @@
 		public function column_purchased_date($record)
 		{
 			echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->purchased_date + (get_option('gmt_offset') * 3600));
+		}
+
+		public function column_actions($record)
+		{
+			global $paylocker;
+			echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName) . '&action=delete&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '&post_id=' . $record->post_id . '&transaction_id=' . $record->transaction_id . '" class="button button-default">' . __('Удалить', 'bizpanda') . '</a>';
 		}
 	}
 	/*@mix:place*/

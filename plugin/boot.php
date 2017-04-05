@@ -26,9 +26,11 @@
 			case 'onp_pl_check_transaction':
 				require_once PAYLOCKER_DIR . '/plugin/admin/ajax/check-transaction.php';
 				break;
+			case 'onp_pl_update_user_premium':
+				require_once PAYLOCKER_DIR . '/plugin/admin/ajax/update-user-subsribe.php';
+				break;
 		}
 	}
-
 
 	if( is_user_logged_in() ) {
 		// Проверяем подписку пользователя

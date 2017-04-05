@@ -179,11 +179,31 @@
 		}
 
 		/**
-		 * Добавляет премиум подписку для пользователя или обновляет ее
-		 * @param $expired
-		 * @return false|int
+		 * Обновляет премиум подписку пользователя
+		 * @param int $expired
+		 * @param int $lockerId
+		 * @return bool|false|int
 		 */
 		public function updateUserPremium($expired, $lockerId)
+		{
+			global $wpdb;
+
+			if( empty($expired) || empty($lockerId) ) {
+				return false;
+			}
+
+			return $wpdb->update("{$wpdb->prefix}opanda_pl_subsribers", array(
+				'expired_end' => $expired
+			), array('user_id' => $this->userId, 'locker_id' => $lockerId), array('%d'), array('%d', '%d'));
+		}
+
+		/**
+		 * Добавляет премиум подписку для пользователя
+		 * @param int $expired
+		 * @param int $lockerId
+		 * @return false|int
+		 */
+		public function addUserPremium($expired, $lockerId)
 		{
 			global $wpdb;
 

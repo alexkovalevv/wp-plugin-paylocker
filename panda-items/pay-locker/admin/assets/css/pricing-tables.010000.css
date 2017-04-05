@@ -6,23 +6,77 @@
 #Opanda_PricingTablesMetabox {
   display: block;
 }
+#Opanda_PricingTablesMetabox .onp-pl-pricing-table-generator {
+  position: relative;
+}
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables {
   margin-bottom: 20px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables::after {
+  display: block;
+  content: '';
+  clear: both;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables.onp-pl-edit {
+  min-height: 330px;
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item {
   position: relative;
   display: inline-block;
-  width: 49%;
-  padding: 40px 50px 40px 20px;
-  min-height: 200px;
-  border: 1px dashed #d0d0d0;
+  width: 50%;
+  padding: 40px 50px 10px 20px;
+  border: 1px dashed #bbbbbb;
   vertical-align: top;
 }
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-delete-table-button {
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-fullwidth {
+  width: 100%;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit {
+  position: absolute !important;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 60px 30px 30px 0;
+  background: #fff;
+  z-index: 9;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-form {
+  display: table;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form {
+  position: relative;
+  display: none;
+  table-layout: fixed;
+  margin: 0;
+  width: 100%;
+  z-index: 3;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form td {
+  padding: 5px 0 5px 10px;
+  text-align: right;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form td:first-child {
+  width: 150px;
+  padding-right: 10px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form td input,
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form td select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-delete-table-button,
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-edit-table-button {
   position: absolute;
   top: 10px;
   right: 10px;
   padding: 4px 8px;
+  z-index: 2;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-edit-table-button {
+  right: 42px;
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-move-table {
   position: absolute;
@@ -32,36 +86,66 @@
   width: 14px;
   background: url('../img/drag.png') no-repeat;
   cursor: move;
+  z-index: 2;
 }
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table {
-  margin: 0;
-  width: 100%;
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding-left: 45px;
+  line-height: 3.9;
+  font-size: 12px;
+  text-transform: uppercase;
+  z-index: 1;
 }
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td {
-  padding: 5px 0;
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-type,
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-price {
+  position: absolute;
+  right: 80px;
+  top: 15px;
+  display: block;
+  width: 80px;
+  margin-left: 10px;
+  background: #4caf50;
+  color: #fff;
+  text-align: center;
+  font-size: 10px;
+  padding: 5px;
+  height: 20px;
+  line-height: 1;
+  border-radius: 3px;
 }
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td:first-child {
-  padding-right: 10px;
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-type.subscribe {
+  background: #673AB7;
 }
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td input,
-#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item table td select {
-  max-width: 250px;
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-price {
+  right: 165px;
+  min-width: 60px;
+  width: auto;
+  background: #E91E63;
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-separator {
-  width: 98%;
+  width: 100%;
   min-height: 50px;
   text-align: center;
   padding: 10px;
   line-height: 2;
-  margin: 3px 0 6px;
+  clear: both;
 }
 #Opanda_PricingTablesMetabox .factory-bootstrap-000 .sortable-placeholder {
   display: inline-block;
-  height: 348px;
-  width: 49%;
+  height: 52px;
+  margin: 0;
+  line-height: 0;
+  padding: 0;
+  width: 50%;
+  clear: both;
+  vertical-align: top;
 }
 #Opanda_PricingTablesMetabox .factory-bootstrap-000 .sortable-placeholder.separator {
   display: block;
-  height: 48px;
-  width: 98%;
+  height: 50px;
+  width: 100%;
 }

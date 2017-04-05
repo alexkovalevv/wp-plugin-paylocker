@@ -7,6 +7,7 @@
 	 */
 
 	require BIZPANDA_PAYLOCKER_DIR . '/admin/pages/settings.php';
+	require BIZPANDA_PAYLOCKER_DIR . '/admin/metaboxes/basic-options.php';
 
 	function onp_pl_register_plugin($items)
 	{
@@ -53,6 +54,28 @@
 	add_filter('opanda_items', 'onp_pl_register_paylocker_item', 1);
 
 	/**
+	 * Создаем доплнительные опции принудительно для всех платных замков
+	 * @param $postId
+	 */
+	function onp_pl_save_post_callback($postId)
+	{
+		global $post;
+		if( $post->post_type != 'opanda-item' ) {
+			return;
+		}
+
+		$lockerType = get_post_meta($postId, 'opanda_item', true);
+
+		if( $lockerType != 'pay-locker' ) {
+			return;
+		}
+
+		update_post_meta($postId, 'opanda_ajax', 1);
+	}
+
+	add_action('save_post', 'onp_pl_save_post_callback');
+
+	/**
 	 * Показывает условия видимости на странице списка замков
 	 * @param $postId
 	 * @param $empty
@@ -88,6 +111,11 @@
 				$restructuringMetaboxes[$key] = $metabox;
 			}
 		}
+
+		$restructuringMetaboxes[] = array(
+			'class' => 'Opanda_ThemeStyleMetabox',
+			'path' => BIZPANDA_PAYLOCKER_DIR . '/admin/metaboxes/theme-style-options.php'
+		);
 
 		$restructuringMetaboxes[] = array(
 			'class' => 'Opanda_PricingTablesMetabox',
@@ -147,7 +175,14 @@
 		OPanda_ThemeManager::registerTheme(array(
 			'name' => 'starter',
 			'title' => 'Starter',
-			'path' => OPANDA_BIZPANDA_DIR . '/themes/starter',
+			//'path' => OPANDA_BIZPANDA_DIR . '/themes/starter',
+			'items' => array('pay-locker')
+		));
+
+		OPanda_ThemeManager::registerTheme(array(
+			'name' => 'blueberry',
+			'title' => 'Blueberry',
+			//'path' => OPANDA_BIZPANDA_DIR . '/themes/starter',
 			'items' => array('pay-locker')
 		));
 	}

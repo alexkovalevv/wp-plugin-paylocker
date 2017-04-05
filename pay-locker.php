@@ -12,9 +12,11 @@
 	// Constatns & Resources
 	//
 
+	#comp remove
 	ini_set('display_errors', 1);
 	ini_set('display_startup_errors', 1);
 	//error_reporting(E_ALL);
+	#endcomp
 
 	if( defined('PAYLOCKER_PLUGIN_ACTIVE') ) {
 		return;
@@ -91,7 +93,7 @@
 		/**
 		 * Displays a note about that it's requited to update other plugins.
 		 */
-		if( !$activationHook && !bizpanda_validate(PAYLOCKER_BIZPANDA_VERSION, 'Social Locker') ) {
+		if( !$activationHook && !bizpanda_validate(PAYLOCKER_BIZPANDA_VERSION, 'Paylocker') ) {
 			return;
 		}
 
@@ -132,6 +134,10 @@
 
 		require(PAYLOCKER_DIR . '/panda-items/pay-locker/boot.php');
 		require(PAYLOCKER_DIR . '/plugin/boot.php');
+
+		$paylocker->loadAddons(array(
+			'styleroller' => PAYLOCKER_DIR . '/addons/styleroller-addon/styleroller-addon.php'
+		));
 	}
 
 	add_action('bizpanda_init', 'onp_pl_init_bizpanda');
@@ -165,7 +171,7 @@
 	 * Displays a note about that it's requited to update other plugins.
 	 */
 	if( is_admin() && defined('OPANDA_ACTIVE') ) {
-		bizpanda_validate(PAYLOCKER_BIZPANDA_VERSION, 'Social Locker');
+		bizpanda_validate(PAYLOCKER_BIZPANDA_VERSION, 'Paylocker');
 	}
 
 	// todo: удалить дополнение для публичной версии

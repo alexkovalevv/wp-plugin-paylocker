@@ -36,12 +36,14 @@
 				self.updateTablesData();
 			});
 
-			$('.onp-pl-table-payment-type-control').change(function() {
+			$(document).on('change', '.onp-pl-table-payment-type-control', function() {
 				self.checkoutPaymentType();
 			});
 
 			$('.onp-pl-pg-create-table-button').click(function() {
-				$('.onp-pl-pg-tables').append(self.tableItemPrototype.clone());
+				var newTable = self.tableItemPrototype.clone();
+				$('.onp-pl-pg-tables').append(newTable);
+				self.editTable(newTable);
 				self.refreshTables();
 				$('#onp-pl-pricing-tables-data').change();
 				return false;
@@ -61,6 +63,13 @@
 				return false;
 			});
 
+			$(document).on('click', '.onp-pl-pg-edit-table-button', function() {
+				self.editTable($(this).closest('.onp-pl-pg-tables-item'));
+				return false;
+			});
+
+			//
+
 			// make shortable
 			$(".onp-pl-pg-tables").addClass("ui-sortable");
 			$(".onp-pl-pg-tables").sortable({
@@ -68,7 +77,8 @@
 				opacity: 0.7,
 				items: ".onp-pl-pg-tables-item",
 				over: function(event, ui) {
-					if( $(event.toElement).closest('.onp-pl-pg-tables-item').hasClass('onp-pl-pg-tables-separator') ) {
+					var el = $(event.toElement).closest('.onp-pl-pg-tables-item');
+					if( el.hasClass('onp-pl-pg-tables-separator') ) {
 						$('.sortable-placeholder').addClass('separator');
 					}
 				},
@@ -79,15 +89,46 @@
 		},
 
 		checkoutPaymentType: function() {
+			var self = this;
 			$('.onp-pl-table-payment-type-control').each(function() {
 				var table = $(this).closest('.onp-pl-pg-tables-item');
 
 				if( $(this).val() == 'subscribe' ) {
-					table.find('.onp-pl-table-expired-control').closest('tr').fadeIn();
+					table.find('.onp-pl-table-td-expired').fadeIn(function() {
+						$(this).css({display: 'table-cell'});
+					});
 				} else {
-					table.find('.onp-pl-table-expired-control').closest('tr').fadeOut();
+					table.find('.onp-pl-table-td-expired').fadeOut();
 				}
 			});
+
+		},
+
+		editTable: function($handler) {
+			if( !$handler.hasClass('onp-pl-edit') ) {
+				$('.onp-pl-pg-edit-table-button').find('.fa').removeClass('fa-times').addClass('fa-cog');
+				$('.onp-pl-pg-tables-item').removeClass('onp-pl-edit');
+				$handler.addClass('onp-pl-edit');
+				this.updateEditAreaSize();
+				$handler.find('.onp-pl-pg-edit-table-button').find('.fa').removeClass('fa-cog').addClass('fa-times');
+
+				$(".onp-pl-pg-tables").sortable("disable");
+			} else {
+				$handler.find('.onp-pl-pg-edit-table-button').find('.fa').removeClass('fa-times').addClass('fa-cog');
+				$handler.removeClass('onp-pl-edit');
+				this.updateEditAreaSize();
+				$(".onp-pl-pg-tables").sortable("enable");
+			}
+		},
+
+		updateEditAreaSize: function() {
+			var self = this;
+			var elHeight = $('.onp-pl-pg-tables-item.onp-pl-edit').find('.onp-pl-pg-table-form').outerHeight(true);
+			if( elHeight ) {
+				$('.onp-pl-pg-tables').height(elHeight + 50);
+			} else {
+				$('.onp-pl-pg-tables').css({height: "auto"});
+			}
 
 		},
 
@@ -162,6 +203,16 @@
 					itemPrototype.find(controlClassName).val(tables[tableName][fieldName]);
 				}
 
+				itemPrototype.find('.onp-pl-pg-table-name').text(tables[tableName]['header']);
+				var tableType = 'Покупка';
+				if( tables[tableName]['paymentType'] === 'subscribe' ) {
+					tableType = 'Подписка';
+					itemPrototype.find('.onp-pl-pg-table-type').addClass('subscribe');
+				}
+
+				itemPrototype.find('.onp-pl-pg-table-price').text(tables[tableName]['price'] + ' руб.');
+				itemPrototype.find('.onp-pl-pg-table-type').text(tableType);
+
 				$('.onp-pl-pg-tables').append(itemPrototype);
 			}
 
@@ -196,6 +247,19 @@
 
 					tableName = 'table_' + i;
 				}
+				/****/
+				$(this).find('.onp-pl-pg-table-name').text(tableData['header']);
+				var tableType = 'Покупка';
+				$(this).find('.onp-pl-pg-table-type').removeClass('subscribe');
+				if( tableData['paymentType'] === 'subscribe' ) {
+					tableType = 'Подписка';
+					$(this).find('.onp-pl-pg-table-type').addClass('subscribe');
+				}
+
+				$(this).find('.onp-pl-pg-table-price').text(tableData['price'] + ' руб.');
+				$(this).find('.onp-pl-pg-table-type').text(tableType);
+				/****/
+
 				tables[tableName] = tableData;
 				self.tablesOrder.push(tableName);
 			});

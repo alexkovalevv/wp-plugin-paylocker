@@ -11,13 +11,10 @@
 		global $post;
 
 		wp_enqueue_script('paylocker-core', PAYLOCKER_URL . '/plugin/assets/js/paylocker.010001' . '.js', array('opanda-lockers'), false, true);
-
-		if( !is_user_logged_in() ) {
-			wp_enqueue_script('paylocker-helpers', PAYLOCKER_URL . '/plugin/assets/js/paylocker-helpers.010000.js', array(
-				'opanda-lockers',
-				'paylocker-core'
-			), false, true);
-		}
+		wp_enqueue_script('paylocker-helpers', PAYLOCKER_URL . '/plugin/assets/js/paylocker-helpers.010000.js', array(
+			'opanda-lockers',
+			'paylocker-core'
+		), false, true);
 
 		wp_localize_script('paylocker-core', '__paylocker', array(
 			'loginUrl' => site_url('wp-login.php'),

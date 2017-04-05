@@ -59,7 +59,7 @@
 
 		public function indexAction()
 		{
-			global $bizpanda;
+			global $bizpanda, $paylocker;
 
 			$options[] = array(
 				'type' => 'dropdown',
@@ -110,7 +110,7 @@
 			$options[] = array(
 				'type' => 'hidden',
 				'name' => 'label',
-				'value' => 'fsdf'
+				'value' => ''
 			);
 			$options[] = array(
 				'type' => 'hidden',
@@ -125,7 +125,7 @@
 			$options[] = array(
 				'type' => 'hidden',
 				'name' => 'successURL',
-				'value' => admin_url('admin.php?page=begin_subscribe-paylocker&payment_proccess=waiting')
+				'value' => admin_url('admin.php?page=begin_subscribe-' . $paylocker->pluginName . '&payment_proccess=waiting')
 			);
 
 			$options[] = array(

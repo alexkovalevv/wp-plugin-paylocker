@@ -1,8 +1,7 @@
 /**
- * Сценарий для страницы оформления подписки
  *
  * @author Alex Kovalev <alex.kovalevv@gmail.com>
- * @copyright Alex Kovalev 10.01.2017
+ * @copyright Alex Kovalev 31.01.2017
  * @version 1.0
  */
 
@@ -51,6 +50,7 @@
 				});
 
 			});
+
 		},
 
 		updateTablePrice: function() {
@@ -71,11 +71,10 @@
 				dataType: 'json',
 				data: {
 					action: 'onp_pl_get_pricing_tables',
-					lockerId: self.payLockerId
+					lockerId: self.payLockerId,
+					tableType: 'purchase'
 				},
 				success: function(data, textStatus, jqXHR) {
-					console.log(data);
-
 					$('#onp_pl_table_name').html('');
 
 					if( !data || data.error ) {

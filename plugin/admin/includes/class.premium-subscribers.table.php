@@ -249,7 +249,7 @@
 
 			$columns['locker_title'] = __('Название подписки', 'bizpanda');
 			$columns['expired_begin'] = __('Дата активации', 'bizpanda');
-			$columns['expired_end'] = __('Заканчивается', 'bizpanda');
+			$columns['expired_end'] = __('Заканчивается через (дней)', 'bizpanda');
 
 			//if( !current_user_can('administrator') ) {
 			$columns['actions'] = '';
@@ -260,6 +260,33 @@
 		}
 
 		/**
+		 * Generates content for a single row of the table
+		 *
+		 * @since 3.1.0
+		 * @access public
+		 *
+		 * @param object $item The current item
+		 */
+		public function single_row($record)
+		{
+			$subscribeTime = $this->convertTimetoDays($record->expired_end);
+			$class = '';
+
+			if( $subscribeTime < 7 && $subscribeTime > 0 ) {
+				$class = ' class="onp-pl-soon-expired-row"';
+			}
+
+			if( $subscribeTime < 0 || $subscribeTime === 0 ) {
+				$class = ' class="onp-pl-already-expired-row"';
+			}
+
+			echo '<tr' . $class . '>';
+			$this->single_row_columns($record);
+			echo '</tr>';
+		}
+
+
+		/**
 		 * Shows a checkbox.
 		 *
 		 * @since 1.0.7
@@ -267,7 +294,7 @@
 		 */
 		public function column_cb($record)
 		{
-			echo sprintf('<input type="checkbox" name="onp_pl_premium_subscribers[]" value="%s" />', $record->ID);
+			echo sprintf('<input type="checkbox" name="onp_pl_premium_subscribers[]" value="%s" />', $record->user_id);
 		}
 
 		/**
@@ -333,18 +360,18 @@
 		 */
 		public function column_expired_end($record)
 		{
-			$subscribeTime = round(($record->expired_end - time()) / 86400);
-
-			if( $subscribeTime < 0 ) {
-				$subscribeTime = 0;
-			}
+			$subscribeTime = $this->convertTimetoDays($record->expired_end);
 
 			if( current_user_can('administrator') ) {
-				if( $subscribeTime ) {
-					echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->expired_end + (get_option('gmt_offset') * 3600));
-				} else {
+				//if( $subscribeTime ) {
+				//echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->expired_end + (get_option('gmt_offset') * 3600));
+				//echo sprintf(__('через %d дней', 'bizpanda'), $subscribeTime);
+				echo '<input type="text" data-user-id="' . $record->user_id . '" data-locker-id="' . $record->locker_id . '" data-default-expired="' . $subscribeTime . '" class="onp-pl-expired-field" value="' . $subscribeTime . '">';
+				echo '<a href="#" class="button button-default onp-pl-offset-left-10 onp-pl-x25-button onp-pl-plus-button">+</button>';
+				echo '<a href="#" class="button button-default onp-pl-x25-button onp-pl-minus-button">-</button>';
+				/*} else {
 					echo '<span style="color:red;">' . __('подписка истекла', 'bizpanda') . '</span>';
-				}
+				}*/
 			} else {
 
 				if( $subscribeTime ) {
@@ -359,11 +386,18 @@
 		{
 			global $paylocker;
 			if( !current_user_can('administrator') ) {
-				echo '<a href="' . admin_url('admin.php?page=begin_subscribe-paylocker&locker_id=' . $record->locker_id) . '" class="button button-default">Продлить подписку</a>';
+				echo '<a href="' . admin_url('admin.php?page=begin_subscribe-' . $paylocker->pluginName . '&locker_id=' . $record->locker_id) . '" class="button button-default">Продлить подписку</a>';
 			} else {
-				echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=edit&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-primary">Редактировать</a> ';
-				echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=deactivate&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-default">Деактивировать</a>';
+				//echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=edit&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-primary">Редактировать</a> ';
+				//echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=deactivate&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-default">Деактивировать</a>';
 			}
+		}
+
+		public function convertTimetoDays($expired)
+		{
+			return ($expired - time()) > 0
+				? round(($expired - time()) / 86400)
+				: 0;
 		}
 	}
 /*@mix:place*/

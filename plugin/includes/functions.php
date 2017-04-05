@@ -6,6 +6,36 @@
 	 * @version 1.0
 	 */
 
+	/**
+	 * Функции возвращает список замков по установленным параметрам
+	 * @param $type
+	 */
+	function onp_pl_get_lockers_list($type = 'pay-locker')
+	{
+		$args = array(
+			'posts_per_page' => -1,
+			'post_status' => 'publish',
+			'post_type' => 'opanda-item',
+			'meta_key' => 'opanda_item',
+			'meta_value' => 'pay-locker'
+		);
+
+		$paylockers = get_posts($args);
+
+		$needLockers = array();
+		foreach($paylockers as $locker) {
+			$needLockers[] = array($locker->ID, $locker->post_title);
+		}
+
+		return $needLockers;
+	}
+
+	/**
+	 * Получает информацию о тарифной таблице
+	 * @param int $lockerId
+	 * @param string $tableName
+	 * @return array|null
+	 */
 	function onp_pl_get_pricing_table($lockerId, $tableName)
 	{
 		if( empty($lockerId) || empty($tableName) ) {

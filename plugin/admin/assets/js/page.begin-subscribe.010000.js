@@ -55,6 +55,7 @@
 							}
 						}
 
+						$('#label').val(data.transaction_id);
 						$('#onp-pl-payment-form').submit();
 					}
 				});

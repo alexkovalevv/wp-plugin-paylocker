@@ -1,5 +1,5 @@
 /*!
- * Panda Lockers - v2.1.2, 2017-01-21 
+ * Panda Lockers - v2.1.2, 2017-02-18 
  * for jQuery: http://onepress-media.com/plugin/social-locker-for-jquery/get 
  * for Wordpress: http://onepress-media.com/plugin/social-locker-for-wordpress/get 
  * 
@@ -28,7 +28,7 @@
 		pl_payment_form_target_label: 'Назначение платежа',
 		pl_payment_form_price_label: 'Сумма',
 		pl_payment_form_way_label: 'Способ оплаты',
-		pl_payment_form_terms: 'C <a href="#">условиями оплаты</a> ознакомлен',
+		pl_payment_form_terms: 'C <a href="{%terms_url%}" target="_blank">условиями оплаты</a> ознакомлен',
 		pl_payment_form_process: 'Пожалуйста, подождите... Мы проверяем ваш платеж.',
 
 		pl_separatorText: '----- ИЛИ -----',
@@ -46,7 +46,7 @@
 		pl_prompt_reminde_subscribe_button_yes: 'Перейти к оплате',
 		pl_prompt_reminde_subscribe_button_no: 'Отменить подписку',
 		// prompt email not exists
-		pl_promt_email_not_exists: 'Ваш email адрес не зарегистрирован или вы ввели его с ошибкой. Создать новый аккаунт с этим email адресом и привязать к нему вашу покупку?',
+		pl_promt_email_not_exists: '[email] не зарегистрирован или вы ввели его с ошибкой. Создать новый аккаунт с этим email адресом и привязать к нему вашу покупку?',
 		pl_promt_email_not_button_yes: 'Да, создать новый аккаунт',
 		pl_promt_email_not_button_no: 'Отмена',
 
@@ -288,10 +288,10 @@
 			ctableAfter_button_text = options.afterButtonText || $.pandalocker.lang.pl_ctable_after_button_text;
 
 		var controlTable = $('<div class="onp-pl-control-table"></div>'),
-			tableHeader = $('<h3 class="onp-pl-ctable-header">' + ctableHeader + '</h3>'),
-			tablePrice = $('<div class="onp-pl-ctable-price">' + ctablePrice + ' р.</div>'),
+			tableHeader = $('<h3 class="onp-pl-ctable-header ' + options.paymentType + '">' + ctableHeader + '</h3>'),
+			tablePrice = $('<div class="onp-pl-ctable-price">' + ctablePrice + '<span class="onp-pl-ctable-currency">р.</span></div>'),
 			beforeButtonText = $('<div class="onp-pl-ctable-before-button-text">' + ctableBefore_button_text + '</div>'),
-			tableButton = $('<button class="onp-pl-ctable-button">' + ctableButton_text + '</button>'),
+			tableButton = $('<button class="onp-pl-ctable-button ' + options.paymentType + '">' + ctableButton_text + '</button>'),
 			afterButtonText = $('<div class="onp-pl-ctable-after-button-text">' + ctableAfter_button_text + '</div>');
 
 		controlTable.append(tableHeader)
@@ -405,19 +405,42 @@
 		}
 	};
 
+	$.pandalocker.themes['blueberry'] = {
+		socialButtons: {
+			layout: 'horizontal',
+			counter: false,
+			flip: false
+		}
+	};
+
 	$.pandalocker.hooks.add('opanda-filter-options', function(options, locker) {
+
+		//console.log(options);
 
 		if( options.paylocker ) {
 			options.locker.close = false;
 			options.locker.timer = 0;
 
 			options.theme = {
-				name: 'paylocker'
+				name: 'blueberry'
 			};
-
 		}
 
 		return options;
+	});
+
+	// Добавляем ссылку на страницу помощь
+	$.pandalocker.hooks.add('opanda-lock', function(e, locker) {
+		if( locker.options.paylocker && locker.options.paylocker.helpUrl ) {
+			$(locker.locker).prepend('<a class="onp-pl-help-link" href="' + locker.options.paylocker.helpUrl + '" target="_blank">Помощь</a>');
+		}
+
+		$(locker.locker).append('<div class="onp-pl-bottom-panel">' +
+			'<a href="" class="onp-pl-login-link">Уже подписаны? Тогда войдите</a>' +
+			'<a href="mailto:" class="onp-pl-mailto-link">Остались вопросы? Напишите нам.</a>' +
+			'<div style="clear: both;"></div>' +
+			'</div>'
+		);
 	});
 
 	// Регистрируем экран с формой оплаты от яндекса
@@ -448,6 +471,8 @@
 			function($holder, options) {
 
 				var optionsDefault = {
+					termsPageUrl: '#',
+					alternatePaymentTypePageUrl: '#',
 					receiver: null,
 					label: null,
 					sum: null,
@@ -491,6 +516,12 @@
 					screenDescription = '<div class="onp-pm-screen-text">' + screenDescriptionText + '</div>',
 					formWrap = $('<div class="onp-pm-yandex-payment-form"></div>');
 
+				var alternatePaymentTypeLink = options.alternatePaymentTypePageUrl
+					? '<tr><td></td><td><a href="' + options.alternatePaymentTypePageUrl + '" class="onp-pm-pform-alternate-payment-type-link" target="_blank">Не подходит способ оплаты?</a></td></tr>'
+					: '';
+
+				var termsLink = $.pandalocker.lang.pl_payment_form_terms.replace("{%terms_url%}", options.termsPageUrl);
+
 				var newPaymentForm = '<form method="POST" action="https://money.yandex.ru/quickpay/confirm.xml" target="_blank">' +
 					'<table class="onp-pm-pform-table"><tbody>' +
 					'<tr><td>' + $.pandalocker.lang.pl_payment_form_target_label + ':</td><td><strong>' + options.targets + '</strong></td></tr>' +
@@ -500,10 +531,10 @@
 					'<option value="AC" selected>Банковской картой</option>' +
 					'<option value="PC">Яндекс.Деньгами</option>' +
 					'</select></label>' +
-					'</td></tr>' +
+					'</td></tr>' + alternatePaymentTypeLink +
 					'</tbody></table>' +
 					'<div class="onp-pm-pform-bottom">' +
-					'<div class="onp-pm-pform-bottom-left-side"><label><input type="checkbox" class="onp-pm-payment-terms-checkbox" checked> ' + $.pandalocker.lang.pl_payment_form_terms + ' </label></div>' +
+					'<div class="onp-pm-pform-bottom-left-side"><label><input type="checkbox" class="onp-pm-payment-terms-checkbox" checked> ' + termsLink + ' </label></div>' +
 					'<div class="onp-pm-pform-bottom-right-side"><input type="submit" class="onp-pm-payment-button" value="Перейти к оплате"></div>' +
 					'</div>' +
 					'<input type="hidden" name="receiver" value="' + options.receiver + '">		' +
@@ -559,7 +590,6 @@
 								transactionId: options.label
 							},
 							success: function(data, textStatus, jqXHR) {
-								console.log(data);
 
 								if( !data || data.error || data.transaction_status == 'cancel' ) {
 									clearInterval(pullTimer);

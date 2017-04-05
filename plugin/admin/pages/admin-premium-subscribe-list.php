@@ -39,8 +39,7 @@
 			$this->scripts->request(array(
 				'control.checkbox',
 				'control.dropdown',
-				'plugin.ddslick',
-				'holder.more-link'
+				'bootstrap.datepicker'
 			), 'bootstrap');
 
 			$this->styles->request(array(
@@ -49,12 +48,13 @@
 				'bootstrap.separator',
 				'control.dropdown',
 				'control.checkbox',
-				'holder.more-link',
+				'bootstrap.datepicker'
 			), 'bootstrap');
 
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.premium-subscribers.010000.css');
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.begin-subscribe.010000.css');
 			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.add-user-premium.010000.js');
+			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.admin-premium-subscribers.010000.js');
 		}
 
 		public function getCount($cache = true)
@@ -258,7 +258,7 @@
 					? $_POST['onp_pl_user_name']
 					: null;
 
-				$url = 'edit.php?post_type=opanda-item&page=admin_premium_subscribers-paylocker&action=addPremium';
+				$url = 'edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName . '&action=addPremium';
 
 				if( !empty($lockerId) ) {
 					$url .= '&locker_id=' . $lockerId;
@@ -284,8 +284,6 @@
 					wp_redirect($url . '&opanda_error_code=invalid_table_expired');
 				}
 
-				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
-
 				$current_user = get_user_by('login', $userName);
 
 				if( empty($current_user) ) {
@@ -293,42 +291,81 @@
 					exit;
 				}
 
-				$premium = new OnpPl_PremiumSubscriber($current_user->ID);
-				if( !$premium->updateUserPremium($tableExpired, $lockerId) ) {
-					wp_redirect($url . '&opanda_error_code=save_error');
+				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
+
+				$transaction = OnpPl_Transactions::beginTransaction(array(
+					'user_id' => $current_user->ID,
+					'locker_id' => $lockerId,
+					'post_id' => 0,
+					'table_payment_type' => $table['paymentType'],
+					'table_name' => $tableName,
+					'table_price' => $table['price'],
+				));
+
+				if( empty($transaction) ) {
+					wp_redirect($url . '&opanda_error_code=transaction_id_not_created');
 					exit;
 				}
 
-				wp_redirect(admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName));
-				exit;
+				try {
+					OnpPl_Transactions::finishTransaction($transaction['transaction_id']);
+					wp_redirect(admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName));
+					exit;
+				} catch( Exception $e ) {
+					wp_redirect($url . '&opanda_error_code=save_error');
+					exit;
+				}
 			}
 		}
 
 		public function editAction()
 		{
-			global $bizpanda;
+			global $paylocker, $bizpanda, $wpdb;
+
+			$lockerId = isset($_REQUEST['locker_id'])
+				? intval($_REQUEST['locker_id'])
+				: null;
+
+			$userId = isset($_REQUEST['user_id'])
+				? intval($_REQUEST['user_id'])
+				: null;
 
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'subscribe_locker',
 				'title' => __('Выберите подписку*', 'bizpanda'),
 				'hint' => __('Выберите из списка нужную вам подписку.', 'bizpanda'),
-				'cssClass' => isset($_GET['locker_id'])
+				'cssClass' => !empty($lockerId)
 					? 'onp-pl-hide-control'
 					: '',
-				'value' => isset($_GET['locker_id'])
-					? $_GET['locker_id']
-					: null,
+				'value' => $lockerId,
 				'data' => array($this, 'getLockers')
 			);
 
 			$userName = '';
-			if( isset($_GET['user_id']) && !empty($_GET['user_id']) ) {
-				$userId = intval($_GET['user_id']);
+			if( !empty($userId) ) {
 				$current_user = get_user_by('id', $userId);
 				if( !empty($current_user) ) {
 					$userName = $current_user->data->user_login;
+				} else {
+					wp_die(__('Ошибка! Пользователь не найден.', 'bizpanda'));
+					exit;
 				}
+			}
+
+			if( empty($userId) || empty($lockerId) ) {
+				wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'bizpanda'));
+				exit;
+			}
+
+			// Выполняем запрос, чтобы получить данные по подписке
+			$subscribeExpiredEnd = $wpdb->get_var("
+					SELECT expired_end FROM {$wpdb->prefix}opanda_pl_subsribers
+					WHERE user_id='{$userId}' AND locker_id='{$lockerId}'");
+
+			if( empty($subscribeExpiredEnd) ) {
+				wp_die(__('Ошибка! Подписка не найдена.', 'bizpanda'));
+				exit;
 			}
 
 			$options[] = array(
@@ -336,7 +373,12 @@
 				'name' => 'expired_end',
 				'title' => __('Подписка истекает' . '', 'bizpanda'),
 				'hint' => __('Выберите дату, когда истекает подписка.', 'bizpanda'),
-				'value' => "25/12/2016"
+				'value' => date('d.m.Y', $subscribeExpiredEnd),
+				'htmlAttrs' => array(
+					'data-provide' => 'datepicker-inline',
+					'data-date-language' => 'ru',
+					'data-date-autoclose' => 'true'
+				)
 			);
 
 			$options[] = array(
@@ -347,7 +389,7 @@
 				'value' => $userName,
 				'cssClass' => !empty($userName)
 					? 'onp-pl-hide-control'
-					: '',
+					: ''
 			);
 
 			// creating a form
@@ -362,15 +404,43 @@
 
 			$form->add($options);
 
+			if( isset($_POST['onp_pl_edit_subscribe']) ) {
+				$exiredTime = isset($_POST['onp_pl_expired_end'])
+					? strtotime($_POST['onp_pl_expired_end'])
+					: null;
 
+				$url = 'edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName . '&action=edit&locker_id=' . $lockerId . '&user_id=' . $userId;
+
+				if( empty($exiredTime) ) {
+					wp_redirect($url . '&opanda_error_code=invalid_subscribe_date');
+					exit;
+				}
+
+				if( empty($userId) || empty($lockerId) ) {
+					wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'bizpanda'));
+					exit;
+				}
+
+				$result = $wpdb->update("{$wpdb->prefix}opanda_pl_subsribers", array(
+					'expired_end' => $exiredTime
+				), array('user_id' => $userId, 'locker_id' => $lockerId), array('%d'), array('%d', '%d'));
+
+				if( !$result ) {
+					wp_redirect($url . '&opanda_error_code=unexpected_error');
+					exit;
+				}
+
+				wp_redirect($url . '&opanda_saved=1');
+				exit;
+			}
 			?>
 			<div class="wrap" id="onp-pl-begin-subscribe-page">
 				<div class="factory-bootstrap-000">
 					<h2>
-						<?php _e('Добавление подписки для пользователя', 'bizpanda') ?>
+						<?php _e('Редактирование подписки пользователя', 'bizpanda') ?>
 					</h2>
 
-					<p><?php _e('На этой странице вы можете посмотреть список всех пользователей, которые имеют премиум подписку.'); ?></p>
+					<p><?php _e('На этой странице вы можете откредактировать подписку пользователя.'); ?></p>
 
 					<form method="POST" id="onp-pl-add-subscribe-form" class="form-horizontal" action="">
 						<?php if( isset($_GET['opanda_saved']) ) { ?>
@@ -382,27 +452,21 @@
 						<?php if( isset($_GET['opanda_error_code']) ): ?>
 							<div id="message" class="alert alert-danger">
 								<p>
-									<?php _e('Возникла ошибка при сохранении данных!', 'bizpanda'); ?>
-									<?php if( $_GET['opanda_error_code'] == 'locker_is_not_selected' ): ?>
-										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'bizpanda') ?>
+									<?php _e('Возникла ошибка при обновлении данных!', 'bizpanda'); ?>
+									<?php if( $_GET['opanda_error_code'] == 'invalid_subscribe_date' ): ?>
+										<?php _e('Не установлена дата окончания платной подписки.', 'bizpanda') ?>
 									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'invalid_user_name' ): ?>
-										<?php _e('Вы должны заполнить поле "Имя пользователя"' . '.', 'bizpanda') ?>
+									<?php if( $_GET['opanda_error_code'] == 'incorrect_subscribe_date' ): ?>
+										<?php _e('Введен некорректный формат даты.', 'bizpanda') ?>
 									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'invalid_table_expired' ): ?>
-										<?php _e('Не установлен период подписки или он равняется нулю.' . '.', 'bizpanda') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'user_not_found' ): ?>
-										<?php _e('Пользователь с таким именем не найден.' . '.', 'bizpanda') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'save_error' ): ?>
-										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'bizpanda') ?>
+									<?php if( $_GET['opanda_error_code'] == 'unexpected_error' ): ?>
+										<?php _e('Неизвестная ошибка.', 'bizpanda') ?>
 									<?php endif; ?>
 								</p>
 							</div>
 						<?php endif; ?>
 
-						
+
 						<div style="padding-top: 10px;">
 							<?php $form->html(); ?>
 						</div>
@@ -410,7 +474,7 @@
 							<label class="col-sm-2 control-label"> </label>
 
 							<div class="control-group controls col-sm-10">
-								<input id="onp-pl-add-subscribe-button" name="onp_pl_add_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Обновить подписку', 'bizpanda') ?>"/>
+								<input id="onp-pl-add-subscribe-button" name="onp_pl_edit_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Обновить подписку', 'bizpanda') ?>"/>
 							</div>
 						</div>
 					</form>

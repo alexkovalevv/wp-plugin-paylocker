@@ -15,6 +15,10 @@
 			? $_POST['lockerId']
 			: null;
 
+		$tableType = isset($_POST['tableType'])
+			? $_POST['tableType']
+			: 'subscribe';
+
 		if( empty($lockerId) ) {
 			echo json_encode(array(
 				'error' => __('Не передан обязательный атрибут lockerId', 'bizpanda'),
@@ -36,7 +40,7 @@
 
 		$result = array();
 		foreach($tables as $tableName => $table) {
-			if( strpos($tableName, 'separator') === false && $table['paymentType'] == 'subscribe' ) {
+			if( strpos($tableName, 'separator') === false && $table['paymentType'] == $tableType ) {
 				$result[] = array(
 					$tableName,
 					$table['header'],

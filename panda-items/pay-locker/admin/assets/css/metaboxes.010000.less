@@ -1,0 +1,112 @@
+/**
+ * Стили метабоксов для плагина "Платный контент"
+ * @author Alex Kovalev <alex.kovalevv@gmail.com> 
+ * @copyright Alex Kovalev 18.02.2017 
+ */
+
+#Opanda_ThemeStyleMetabox {
+  display: block;
+  .factory-bootstrap-000 {
+    .factory-tab {
+      overflow: visible;
+      .nav-tabs {
+        li {
+          background: none;
+          padding: 0;
+          background: #fff;
+          border: 1px solid #eaeaea;
+          border-right: 0 !important;
+          &:hover {
+            background: #f6f6f6 !important;
+          }
+          a {
+            color: #9e9e9e;
+            border: 0 !important;
+            &:hover {
+              background: none !important;
+            }
+            &:focus {
+              outline: none !important;
+              box-shadow: none !important;
+            }
+          }
+          &.active {
+            border: 1px solid #ddd;
+            a, a:active {
+              color: #464646;
+              background-color: #fbfbfb !important;
+              font-weight: 600;
+            }
+          }
+
+        }
+      }
+      .tab-content {
+        height: auto !important;
+        min-height: 250px !important;
+      }
+      .factory-bodies {
+        background-color: #fbfbfb;
+        border: 1px solid #ddd;
+        padding-left: 30px;
+      }
+    }
+    .form-group {
+      display: inline-block;
+      vertical-align: top;
+      width: 350px;
+      margin-bottom: 50px;
+      label {
+        display: block;
+        width: auto;
+        max-width: inherit;
+        margin-bottom: 8px;
+        color: #797979;
+      }
+    }
+    .form-group-color, .form-group-font {
+      position: relative;
+      max-height: 60px;
+      overflow: visible;
+
+      .factory-color-hex {
+        width: 150px;
+      }
+      .iris-picker {
+        position: absolute;
+        top: 25px;
+        z-index: 99;
+      }
+    }
+
+    .form-group-font {
+      position: relative;
+      overflow: visible;
+      max-height: 105px;
+
+      .iris-picker {
+        top: 65px;
+        left: 90px;
+      }
+
+      .chosen-container {
+        width: 265px !important;
+
+        .chosen-single {
+          height: auto;
+          padding: 5px 10px;
+          background: #fff;
+          border-radius: 2px;
+          border: 1px solid #dadada;
+        }
+        &.chosen-container-active {
+          .chosen-single {
+            //border: 0;
+            box-shadow: none;
+          }
+        }
+      }
+    }
+
+  }
+}

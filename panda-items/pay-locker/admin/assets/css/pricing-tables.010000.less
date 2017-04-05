@@ -7,25 +7,85 @@
 #Opanda_PricingTablesMetabox {
   display: block;
 
+  .onp-pl-pricing-table-generator {
+    position: relative;
+  }
+
   .onp-pl-pg-tables {
+
     margin-bottom: 20px;
+    &::after {
+      display: block;
+      content: '';
+      clear: both;
+    }
+    &.onp-pl-edit {
+      min-height: 330px;
+    }
 
     .onp-pl-pg-tables-item {
       position: relative;
       display: inline-block;
-      width: 49%;
-      padding: 40px 50px 40px 20px;
-      // margin-right: 20px;
-      //min-width: 450px;
-      min-height: 200px;
-      border: 1px dashed #d0d0d0;
+      //float: left;
+      width: 50%;
+      padding: 40px 50px 10px 20px;
+      border: 1px dashed #bbbbbb;
+      //margin-bottom: 1px;
+      // margin-left: 1px;
       vertical-align: top;
+      &.onp-pl-fullwidth {
+        width: 100%;
+      }
+      &.onp-pl-edit {
+        position: absolute !important;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        padding: 60px 30px 30px 0;
+        background: #fff;
+        z-index: 9;
+        .onp-pl-pg-table-form {
+          display: table;
+        }
+      }
 
-      .onp-pl-pg-delete-table-button {
+      .onp-pl-pg-table-form {
+        position: relative;
+        display: none;
+        table-layout: fixed;
+        margin: 0;
+        width: 100%;
+        z-index: 3;
+        td {
+          padding: 5px 0 5px 10px;
+          text-align: right;
+          &:first-child {
+            width: 150px;
+            padding-right: 10px;
+          }
+          input, select {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .onp-pl-table-price-control, .onp-pl-table-expired-control {
+            //width: 90px;
+          }
+        }
+      }
+
+      .onp-pl-pg-delete-table-button, .onp-pl-pg-edit-table-button {
         position: absolute;
         top: 10px;
         right: 10px;
         padding: 4px 8px;
+        z-index: 2;
+      }
+
+      .onp-pl-pg-edit-table-button {
+        right: 42px;
       }
 
       .onp-pl-pg-move-table {
@@ -36,43 +96,75 @@
         width: 14px;
         background: url('../img/drag.png') no-repeat;
         cursor: move;
+        z-index: 2;
       }
 
-      table {
-        margin: 0;
-        width: 100%;
-        td {
-          padding: 5px 0;
-          &:first-child {
-            padding-right: 10px;
-          }
-          input, select {
-            max-width: 250px;
-          }
-        }
+      .onp-pl-pg-table-preview {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        padding-left: 45px;
+        line-height: 3.9;
+        font-size: 12px;
+        //font-weight: bold;
+        text-transform: uppercase;
+        z-index: 1;
+      }
+      .onp-pl-pg-table-type, .onp-pl-pg-table-price {
+        position: absolute;
+        right: 80px;
+        top: 15px;
+        display: block;
+        width: 80px;
+        margin-left: 10px;
+        background: #4caf50;
+        color: #fff;
+        text-align: center;
+        font-size: 10px;
+        padding: 5px;
+        height: 20px;
+        line-height: 1;
+        border-radius: 3px;
+
+      }
+      .onp-pl-pg-table-type.subscribe {
+        background: #673AB7;
+      }
+
+      .onp-pl-pg-table-price {
+        right: 165px;
+        min-width: 60px;
+        width: auto;
+        background: #E91E63;
       }
 
     }
     .onp-pl-pg-tables-separator {
-      width: 98%;
+      width: 100%;
       min-height: 50px;
       text-align: center;
       padding: 10px;
       line-height: 2;
-      margin: 3px 0 6px;
+      clear: both;
     }
   }
 
   .factory-bootstrap-000 .sortable-placeholder {
     display: inline-block;
-    height: 348px;
-    width: 49%;
+    height: 52px;
+    margin: 0;
+    line-height: 0;
+    padding: 0;
+    width: 50%;
+    clear: both;
+    vertical-align: top;
 
     &.separator {
       display: block;
-      height: 48px;
-      width: 98%;
+      height: 50px;
+      width: 100%;
     }
   }
 }
-
