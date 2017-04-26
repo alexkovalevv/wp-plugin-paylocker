@@ -73,6 +73,13 @@
           .onp-pl-table-price-control, .onp-pl-table-expired-control {
             //width: 90px;
           }
+
+          .onp-pl-table-description-control {
+            box-sizing: padding-box;
+            overflow: hidden;
+            white-space: pre-wrap;
+            min-height: 80px;
+          }
         }
       }
 
@@ -94,7 +101,7 @@
         left: 16px;
         height: 14px;
         width: 14px;
-        background: url('../img/drag.png') no-repeat;
+        background: data-uri('../img/drag.png') no-repeat;
         cursor: move;
         z-index: 2;
       }
@@ -139,7 +146,6 @@
         width: auto;
         background: #E91E63;
       }
-
     }
     .onp-pl-pg-tables-separator {
       width: 100%;

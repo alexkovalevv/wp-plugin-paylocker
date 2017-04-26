@@ -4,7 +4,7 @@
 	 * Plugin URI: {comp:pluginUrl}
 	 * Description: {comp:description}
 	 * Author: OnePress <alex.kovalevv@gmail.com>
-	 * Version: 1.0.0
+	 * Version: 1.0.1
 	 * Author URI: http://byonepress.com
 	 */
 
@@ -13,8 +13,8 @@
 	//
 
 	#comp remove
-	ini_set('display_errors', 1);
-	ini_set('display_startup_errors', 1);
+	//ini_set('display_errors', 1);
+	//ini_set('display_startup_errors', 1);
 	//error_reporting(E_ALL);
 	#endcomp
 
@@ -108,7 +108,7 @@
 		$paylocker = new Factory000_Plugin(__FILE__, array(
 			'name' => 'paylocker',
 			'title' => __('Платный контент', 'bizpanda'),
-			'version' => '1.0.0',
+			'version' => '1.0.1',
 			'assembly' => BUILD_TYPE,
 			'lang' => LANG_TYPE,
 			'api' => 'http://api.byonepress.com/1.1/',
@@ -132,12 +132,7 @@
 			array('bizpanda/libs/onepress/updates', 'onp_updates_000')
 		));
 
-		require(PAYLOCKER_DIR . '/panda-items/pay-locker/boot.php');
 		require(PAYLOCKER_DIR . '/plugin/boot.php');
-
-		$paylocker->loadAddons(array(
-			'styleroller' => PAYLOCKER_DIR . '/addons/styleroller-addon/styleroller-addon.php'
-		));
 	}
 
 	add_action('bizpanda_init', 'onp_pl_init_bizpanda');

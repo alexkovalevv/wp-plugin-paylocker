@@ -59,9 +59,10 @@
 		 */
 		public function configure($scripts, $styles)
 		{
-			$styles->add(BIZPANDA_PAYLOCKER_URL . '/admin/assets/css/pricing-tables.010000.css');
-			$scripts->add(BIZPANDA_PAYLOCKER_URL . '/admin/assets/js/pricing-tables-generator.010000.js');
-			$scripts->add(BIZPANDA_PAYLOCKER_URL . '/admin/assets/js/pricing-tables-options.010001.js');
+			$styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/pricing-tables.010000.css');
+			$scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/plugin.autoexpand.js');
+			$scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/pricing-tables-generator.010000.js');
+			$scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/pricing-tables-options.010001.js');
 		}
 
 		/**
@@ -139,7 +140,7 @@
 							<tr>
 								<td>Описание:</td>
 								<td colspan="3">
-									<textarea class="onp-pl-table-description-control form-control" cols="20" rows="3"></textarea>
+									<textarea class="onp-pl-table-description-control form-control" cols="20"></textarea>
 								</td>
 							</tr>
 							<tr>
