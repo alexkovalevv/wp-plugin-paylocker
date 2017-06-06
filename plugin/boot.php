@@ -137,6 +137,17 @@
 	{
 		global $post;
 
+		$themeStyle = opanda_get_item_option($lockerId, 'style__dropdown');
+		$themeColor = opanda_get_item_option($lockerId, 'style__colors');
+
+		if( !empty($themeStyle) ) {
+			$options['theme'] = $themeStyle;
+		}
+
+		if( !empty($themeColor) && $themeColor != 'default' ) {
+			$options['theme'] .= '-' . $themeColor;
+		}
+
 		$options['groups'] = array('pricing-tables');
 		$options['paylocker'] = array();
 
@@ -145,9 +156,12 @@
 
 		$orderTables = array();
 
-		foreach($tables as $tableName => $table) {
-			$orderTables[] = $tableName;
+		if( !empty($tables) ) {
+			foreach($tables as $tableName => $table) {
+				$orderTables[] = $tableName;
+			}
 		}
+
 		$options['paylocker']['ajaxUrl'] = admin_url('admin-ajax.php');
 		$options['paylocker']['helpUrl'] = opanda_get_item_option($lockerId, 'locker_help_url');
 		$options['paylocker']['paymentForms'] = array(
@@ -222,7 +236,7 @@
 
 		protected function getDefaultId()
 		{
-			return get_option('onp_paylocker_defaul_id');
+			return get_option('onp_paylocker_default_id');
 		}
 	}
 

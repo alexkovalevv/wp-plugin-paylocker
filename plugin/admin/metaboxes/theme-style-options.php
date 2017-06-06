@@ -60,7 +60,6 @@
 		public function configure($scripts, $styles)
 		{
 			$this->styles->add(BIZPANDA_PAYLOCKER_URL . '/admin/assets/css/metaboxes.010000.css');
-
 			$this->scripts->request(array(
 				'control.color',
 				'control.color-and-opacity',

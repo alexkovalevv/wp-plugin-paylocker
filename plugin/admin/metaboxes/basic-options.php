@@ -69,6 +69,8 @@
 		), 'bootstrap');
 
 		$styles->request(array(
+			'control.dropdown',
+			'control.radio-colors',
 			'control.dropdown-and-colors'
 		), 'bootstrap');
 	}

@@ -14,6 +14,9 @@
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/begin-subscribe.php');
 	#endcomp
 
+	/**
+	 * Добавляем скрипты paylocker в превью
+	 */
 	function onp_pl_print_scripts_to_locker_preview()
 	{
 		?>
@@ -45,6 +48,7 @@
 				}
 				if( !BizPanda::hasPlugin('optinpanda') && !BizPanda::hasPlugin('sociallocker') && $menuValue[2] === 'leads-bizpanda' ) {
 					unset($submenu['edit.php?post_type=' . OPANDA_POST_TYPE][$menuKey]);
+					unset($bizpandaMenu[$menuKey]);
 				}
 			}
 			$submenu['edit.php?post_type=' . OPANDA_POST_TYPE] = array_slice($bizpandaMenu, 0, 2, true) + $detachMenuItems + array_slice($bizpandaMenu, 2, count($bizpandaMenu) - 2, true);
@@ -57,52 +61,13 @@
 	add_filter('custom_menu_order', '__return_true');
 	add_filter('menu_order', 'onp_pl_reposition_menu');
 
-	// ---
-	// Menu
-	//
-	/**
-	 * Removes the default 'new item' from the admin menu to add own pgae 'new item' later.
-	 *
-	 * @see menu_order
-	 * @since 1.0.0
-	 */
-
-	/*function opanda_remove_new_item($menu)
-	{
-		global $submenu, $paylocker;
-
-		if( onp_lang('ru_RU') ) {
-			//Отличнительный признак для меню лицензирования
-			if( isset($submenu['edit.php?post_type=' . OPANDA_POST_TYPE]) ) {
-				foreach($submenu['edit.php?post_type=' . OPANDA_POST_TYPE] as $menuKey => $menuValue) {
-					if( !BizPanda::isSinglePlugin() ) {
-						if( $menuValue[2] === 'license-manager-optinpanda-rus' ) {
-							$submenu['edit.php?post_type=' . OPANDA_POST_TYPE][$menuKey][0] = $menuValue[0] . "<br>(Opt-In Panda)";
-							$submenu['edit.php?post_type=' . OPANDA_POST_TYPE][$menuKey][3] = $menuValue[3] . "<br>(Opt-In Panda)";
-						} else if( $menuValue[2] === 'license-manager-sociallocker-rus' ) {
-							$submenu['edit.php?post_type=' . OPANDA_POST_TYPE][$menuKey][0] = $menuValue[0] . "<br>(Соц. замок)";
-							$submenu['edit.php?post_type=' . OPANDA_POST_TYPE][$menuKey][3] = $menuValue[3] . "<br>(Соц. замок)";
-						}
-					}
-				}
-			}
-		}
-
-		if( !isset($submenu['edit.php?post_type=' . OPANDA_POST_TYPE]) ) {
-			return $menu;
-		}
-		unset($submenu['edit.php?post_type=' . OPANDA_POST_TYPE][10]);
-
-		return $menu;
-	}*/
-
 	/**
 	 * Changes the menu title if the Social Locker is an only plugin installed from BizPanda.
 	 *
 	 * @since 1.0.0
 	 * @return string A new menu title.
 	 */
-	function paylocker_change_menu_title($title)
+	function onp_pl_change_menu_title($title)
 	{
 		if( !BizPanda::isSinglePlugin() ) {
 			return $title;
@@ -111,7 +76,7 @@
 		return __('Платный контент', 'bizpanda');
 	}
 
-	add_filter('opanda_menu_title', 'paylocker_change_menu_title');
+	add_filter('opanda_menu_title', 'onp_pl_change_menu_title');
 
 	/**
 	 * Changes the menu icon if the Social Locker is an only plugin installed from BizPanda.
@@ -119,7 +84,7 @@
 	 * @since 1.0.0
 	 * @return string A new menu title.
 	 */
-	function paylocker_change_menu_icon($icon)
+	function onp_pl_change_menu_icon($icon)
 	{
 		if( !BizPanda::isSinglePlugin() ) {
 			return $icon;
@@ -128,7 +93,7 @@
 		return PAYLOCKER_URL . '/plugin/admin/assets/img/menu-icon.png';
 	}
 
-	add_filter('opanda_menu_icon', 'paylocker_change_menu_icon');
+	add_filter('opanda_menu_icon', 'onp_pl_change_menu_icon');
 
 	/**
 	 * Changes the shortcode icon if the Social Locker is an only plugin installed from BizPanda.
@@ -136,7 +101,7 @@
 	 * @since 1.0.0
 	 * @return string A new menu title.
 	 */
-	function paylocker_change_shortcode_icon($icon)
+	function onp_pl_change_shortcode_icon($icon)
 	{
 		if( !BizPanda::isSinglePlugin() ) {
 			return $icon;
@@ -145,7 +110,7 @@
 		return PAYLOCKER_URL . '/plugin/admin/assets/img/shortcode-icon.png';
 	}
 
-	add_filter('opanda_shortcode_icon', 'paylocker_change_shortcode_icon');
+	add_filter('opanda_shortcode_icon', 'onp_pl_change_shortcode_icon');
 
 	/**
 	 * Changes the menu title of the page 'New Item' if the Social Locker is an only plugin installed from BizPanda.
@@ -153,7 +118,7 @@
 	 * @since 1.0.0
 	 * @return string A new menu title.
 	 */
-	function paylocker_change_new_item_menu_title($title)
+	function onp_pl_change_new_item_menu_title($title)
 	{
 		if( !BizPanda::isSinglePlugin() ) {
 			return $title;
@@ -162,7 +127,7 @@
 		return __('+ New Locker', 'bizpanda');
 	}
 
-	add_filter('factory_menu_title_new-item-opanda', 'paylocker_change_new_item_menu_title');
+	add_filter('factory_menu_title_new-item-opanda', 'onp_pl_change_new_item_menu_title');
 
 	/**
 	 * Changes labels of Panda Items if the Social Locker is an only plugin installed from BizPanda.
@@ -170,7 +135,7 @@
 	 * @since 4.0.0
 	 * @return mixed A set of new labels
 	 */
-	function paylocker_change_items_lables($labels)
+	function onp_pl_change_items_lables($labels)
 	{
 		if( !BizPanda::isSinglePlugin() ) {
 			return $labels;
@@ -181,7 +146,7 @@
 		return $labels;
 	}
 
-	add_filter('opanda_items_lables', 'paylocker_change_items_lables');
+	add_filter('opanda_items_lables', 'onp_pl_change_items_lables');
 
 	/**
 	 * Makes internal page "License Manager" for the Social Locker
@@ -189,7 +154,7 @@
 	 * @since 1.0.0
 	 * @return bool true
 	 */
-	function paylocker_make_internal_license_manager($internal)
+	function onp_pl_make_internal_license_manager($internal)
 	{
 
 		if( onp_build('premium') ) {
@@ -205,7 +170,7 @@
 		return true;
 	}
 
-	add_filter('factory_page_is_internal_license-manager-paylocker-next', 'paylocker_make_internal_license_manager');
+	add_filter('factory_page_is_internal_license-manager-paylocker-next', 'onp_pl_make_internal_license_manager');
 
 	function onp_pl_register_plugin($items)
 	{
@@ -299,7 +264,7 @@
 	 * @since 1.0.0
 	 */
 
-	function onp_paylocker_metaboxes($metaboxes)
+	function onp_pl_metaboxes($metaboxes)
 	{
 		$restructuringMetaboxes = array();
 		foreach($metaboxes as $key => $metabox) {
@@ -323,9 +288,9 @@
 		return $restructuringMetaboxes;
 	}
 
-	add_filter('opanda_pay-locker_type_metaboxes', 'onp_paylocker_metaboxes', 10, 1);
+	add_filter('opanda_pay-locker_type_metaboxes', 'onp_pl_metaboxes', 10, 1);
 
-	function onp_paylocker_visability_option($options)
+	function onp_pl_visability_option($options)
 	{
 		global $post;
 		$lockerType = get_post_meta($post->ID, 'opanda_item', true);
@@ -354,7 +319,7 @@
 		return $options;
 	}
 
-	add_filter('opanda_visability_options', 'onp_paylocker_visability_option', 10, 1);
+	add_filter('opanda_visability_options', 'onp_pl_visability_option', 10, 1);
 
 	/**
 	 * Registers default themes.

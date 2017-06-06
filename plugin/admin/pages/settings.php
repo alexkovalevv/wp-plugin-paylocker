@@ -20,7 +20,7 @@
 		$updateScreens['payment'] = array(
 			'title' => 'Настройки платежей',
 			'class' => 'OPanda_PaymentSettings',
-			'path' => BIZPANDA_PAYLOCKER_DIR . '/admin/pages/class.payment.php'
+			'path' => PAYLOCKER_DIR . '/plugin/admin/pages/class.payment.php'
 		);
 
 		$screens = $updateScreens + $screens;

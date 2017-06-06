@@ -3,7 +3,7 @@
 	 * Plugin Name: {comp:paylocker}
 	 * Plugin URI: {comp:pluginUrl}
 	 * Description: {comp:description}
-	 * Author: OnePress <alex.kovalevv@gmail.com>
+	 * Author: Alex Kovalevv <alex.kovalevv@gmail.com>
 	 * Version: 1.0.1
 	 * Author URI: http://byonepress.com
 	 */

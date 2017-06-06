@@ -21,7 +21,7 @@
 			// Add user role
 			add_role('pl_premium_subscriber', __('Премиум подписчик', 'bizpanda'), array('read' => true));
 
-			$this->addPost('onp_paylocker_defaul_id', array(
+			$this->addPost('onp_paylocker_default_id', array(
 				'post_type' => OPANDA_POST_TYPE,
 				'post_title' => __('Замок на "Платный контент"', 'bizpanda'),
 				'post_name' => 'onp_paylocker_default'
