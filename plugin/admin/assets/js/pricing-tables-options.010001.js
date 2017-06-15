@@ -13,21 +13,24 @@ if( !window.bizpanda.pricingTablesOptions ) {
 			var self = this;
 			this.item = $('#opanda_item').val();
 
-			$.bizpanda.filters.add('opanda-track-metaboxes', function(tabs) {
-				tabs.push('#Opanda_PricingTablesMetabox');
-				return tabs;
-			});
-
 			$.bizpanda.filters.add('opanda-preview-options', function(options) {
 				var extraOptions = self.getpricingTablesOptions();
 				return $.extend(true, options, extraOptions);
 			});
+
+			$("iframe[name='preview']").load(function() {
+				var iframe = $(this)[0].contentWindow;
+
+				iframe.__$onp.pandalocker.hooks.add('opanda-paylocker-update-options', function(e, locker) {
+					var extraOptions = self.getpricingTablesOptions();
+					locker.options = $.extend(locker.options, extraOptions);
+				});
+			});
 		},
 
 		getpricingTablesOptions: function() {
-			//var buttons = $("#opanda_buttons_order").val();
-
 			var tables = $('#onp-pl-pricing-tables-data').val();
+
 			tables = JSON.parse(tables);
 
 			var tablesOrder = [];
@@ -74,7 +77,7 @@ if( !window.bizpanda.pricingTablesOptions ) {
 			}
 
 			return options;
-		},
+		}
 
 		/*lockPremiumFeatures: function() {
 
@@ -93,11 +96,12 @@ if( !window.bizpanda.pricingTablesOptions ) {
 
 		 return;
 		 }*/
+
 	};
 
 	$(function() {
 		window.bizpanda.pricingTablesOptions.init();
 	});
 
-})(jQuery)
+})(jQuery);
 

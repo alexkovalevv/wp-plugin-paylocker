@@ -10,26 +10,68 @@
 (function($) {
 	'use strict';
 
-	var pageBeginSubscribe = {
-		init: function() {
-			this.payLockerId = $('#subscribe_locker').val();
-			this.loadSelectOption = $('<option name="load">-------------------[Загрузка]-----------------</option>');
-			this.errorSelectOption = $('<option name="none">[Ошибка]: ошибка ajax запроса</option>');
-
-			this.setPricingTablesList();
-			this.registerEvents();
-
-			if( $('#subscribe_locker').hasClass('onp-pl-hide-control') ) {
-				$('#subscribe_locker').attr('disabled', true);
+	if( window.__paylocker === void 0 ) {
+		window.__paylocker = {
+			lang_interface: {
+				loading: null,
+				redirect: null
 			}
-		},
+		};
+	}
 
-		registerEvents: function() {
-			var self = this;
+	$(function() {
+		if( window.__paylocker !== void 0 && window.__paylocker.loadTablesInfo ) {
 
-			$('#onp-pl-start-payment-button').click(function() {
+			var tablesInfo = window.__paylocker.loadTablesInfo;
 
-				$(this).attr('disabled', true).val('Идет перенаправление...');
+			var changeLockerSelector = '#subscribe_locker',
+				changeTableSelector = '#table_name',
+				priceElementSelector = '.onp-pl-table-price-text',
+				paymentType = '#paymentType',
+				saveButtonSelector = '#onp-pl-start-payment-button',
+				disabledAllElements = $(paymentType).add(changeLockerSelector).add(saveButtonSelector).add(changeTableSelector),
+				disabledSomeElements = $(paymentType).add(changeTableSelector).add(saveButtonSelector);
+
+			tablesInfo.disabledElements(disabledAllElements);
+
+			tablesInfo.updatePricingTablesList(changeTableSelector, {
+				lockerId: $(changeLockerSelector).val()
+			}, function(status) {
+				if( status == 'error' ) {
+					tablesInfo.disabledElements(disabledSomeElements);
+					tablesInfo.enabledElements($(changeLockerSelector));
+				} else if( status == 'success' ) {
+					tablesInfo.enabledElements(disabledAllElements);
+				}
+
+				tablesInfo.updateTablePrice(priceElementSelector, changeTableSelector);
+			});
+
+			$(changeLockerSelector).change(function() {
+				var payLockerId = $(this).val();
+
+				tablesInfo.updatePricingTablesList(changeTableSelector, {
+					lockerId: payLockerId
+				}, function(status) {
+					if( status == 'error' ) {
+						tablesInfo.disabledElements(disabledSomeElements);
+						tablesInfo.enabledElements($(changeLockerSelector));
+					} else if( status == 'success' ) {
+						tablesInfo.enabledElements(disabledAllElements);
+					}
+
+					tablesInfo.updateTablePrice(priceElementSelector, changeTableSelector);
+				});
+			});
+
+			$(changeTableSelector).change(function() {
+				tablesInfo.updateTablePrice(priceElementSelector, changeTableSelector);
+			});
+
+			$(saveButtonSelector).click(function() {
+				tablesInfo.disabledElements(disabledAllElements);
+
+				$(this).val(window.__paylocker.lang_interface.redirect);
 
 				$.ajax({
 					url: ajaxurl,
@@ -38,9 +80,9 @@
 					data: {
 						action: 'onp_pl_begin_transaction',
 						locker_id: $('#subscribe_locker').val(),
-						table_name: $('#table_name').val(),
+						table_name: $(changeTableSelector).val(),
 						table_payment_type: 'subscribe',
-						table_price: $('#table_name').find('option:selected').data('price')
+						table_price: $(changeTableSelector).find('option:selected').data('price')
 					},
 					success: function(data, textStatus, jqXHR) {
 
@@ -63,61 +105,9 @@
 				return false;
 			});
 
-			$('#subscribe_locker').change(function() {
-				self.payLockerId = $(this).val();
-
-				self.setPricingTablesList();
-			});
-
-			$('#table_name').change(function() {
-				self.updateTablePrice();
-			});
-		},
-
-		updateTablePrice: function() {
-			var tablePrice = $('#table_name').find('option:selected').data('price');
-			$('#sum').val(tablePrice);
-			$('.onp-pl-table-price-text').text(tablePrice);
-		},
-
-		setPricingTablesList: function() {
-			var self = this;
-
-			$('#table_name').html('');
-			$('#table_name').append(this.loadSelectOption);
-			$('#onp-pl-start-payment-button').attr('disabled', true);
-
-			$.ajax({
-				url: ajaxurl,
-				type: 'post',
-				dataType: 'json',
-				data: {
-					action: 'onp_pl_get_pricing_tables',
-					lockerId: self.payLockerId
-				},
-				success: function(data, textStatus, jqXHR) {
-					console.log(data);
-
-					$('#table_name').html('');
-
-					if( !data || data.error ) {
-						console && console.log(data.error);
-						$('#table_name').append(self.errorSelectOption);
-					}
-
-					for( var i in data ) {
-						$('#table_name').append('<option value="' + data[i][0] + '" data-price="' + data[i][2] + '">' + data[i][1] + '</option>');
-					}
-
-					$('#onp-pl-start-payment-button').attr('disabled', false);
-					self.updateTablePrice();
-				}
-			});
+		} else {
+			throw new Error('[Error]: loadTablesInfo libs is not required.');
 		}
-	};
-
-	$(function() {
-		pageBeginSubscribe.init();
 	});
 
 })(jQuery);

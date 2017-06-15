@@ -5,8 +5,8 @@
 		public function __construct($options = array())
 		{
 
-			$options['singular'] = __('Список премиум подписок', 'bizpanda');
-			$options['plural'] = __('Список премиум подписок', 'bizpanda');
+			$options['singular'] = __('Список премиум подписок', 'plugin-paylocker');
+			$options['plural'] = __('Список премиум подписок', 'plugin-paylocker');
 			$options['ajax'] = false;
 
 			parent::__construct($options);
@@ -28,21 +28,27 @@
 
 			$items = array(
 				'view-all' => array(
-					'title' => __('Все', 'bizpanda'),
+					'title' => __('Все', 'plugin-paylocker'),
 					'link' => $link,
-					'count' => $counts['all'],
+					'count' => isset($counts['all'])
+						? $counts['all']
+						: 0,
 					'current' => $currentStatus == 'all'
 				),
 				'view-active' => array(
-					'title' => __('Активных', 'bizpanda'),
+					'title' => __('Активных', 'plugin-paylocker'),
 					'link' => add_query_arg('opanda_status', 'active', $link),
-					'count' => $counts['active'],
+					'count' => isset($counts['active'])
+						? $counts['active']
+						: 0,
 					'current' => $currentStatus == 'active'
 				),
 				'view-expired' => array(
-					'title' => __('Истекших', 'bizpanda'),
+					'title' => __('Истекших', 'plugin-paylocker'),
 					'link' => add_query_arg('opanda_status', 'expired', $link),
-					'count' => $counts['expired'],
+					'count' => isset($counts['expired'])
+						? $counts['expired']
+						: 0,
 					'current' => $currentStatus == 'expired'
 				)
 			);
@@ -128,6 +134,10 @@
 			if( !current_user_can('administrator') ) {
 				$current_user = wp_get_current_user();
 				$where[] = "user_id='" . $current_user->ID . "'";
+			} else if( isset($_GET['sort']) ) {
+				if( $_GET['sort'] === 'user_id' && isset($_GET['user_id']) ) {
+					$where[] = "user_id='" . (int)$_GET['user_id'] . "'";
+				}
 			}
 
 			if( isset($_GET['opanda_status']) && $_GET['opanda_status'] == 'active' ) {
@@ -186,9 +196,9 @@
 		public function no_items()
 		{
 			if( !isset($_GET['s']) ) {
-				echo __('Не один из пользователей еще не приобрел премиум подписку. ', 'bizpanda');
+				echo __('Не один из пользователей еще не приобрел премиум подписку. ', 'plugin-paylocker');
 			} else {
-				echo __('По вашему запросу ничего не найдено.', 'bizpanda');
+				echo __('По вашему запросу ничего не найдено.', 'plugin-paylocker');
 			}
 		}
 
@@ -244,17 +254,20 @@
 			if( current_user_can('administrator') ) {
 				//$columns['cb'] = '<input type="checkbox" />';
 				$columns['avatar'] = '';
-				$columns['user_name'] = __('Имя пользователя', 'bizpanda');
+				$columns['user_name'] = __('Имя пользователя', 'plugin-paylocker');
 			}
 
-			$columns['locker_title'] = __('Название подписки', 'bizpanda');
-			$columns['expired_begin'] = __('Дата активации', 'bizpanda');
-			$columns['expired_end'] = __('Заканчивается через (дней)', 'bizpanda');
+			$columns['locker_title'] = __('Название подписки', 'plugin-paylocker');
+			$columns['expired_begin'] = __('Дата активации', 'plugin-paylocker');
+			$columns['expired_end'] = __('Заканчивается через (дней)', 'plugin-paylocker');
 
-			//if( !current_user_can('administrator') ) {
-			$columns['actions'] = '';
-
-			//}
+			if( current_user_can('administrator') ) {
+				if( get_option('opanda_notify_subscribe_expire', false) ) {
+					$columns['notify'] = __('Уведомления', 'plugin-paylocker');
+				}
+			} else {
+				$columns['actions'] = __('Действия', 'plugin-paylocker');
+			}
 
 			return $columns;
 		}
@@ -363,21 +376,22 @@
 			$subscribeTime = $this->convertTimetoDays($record->expired_end);
 
 			if( current_user_can('administrator') ) {
-				//if( $subscribeTime ) {
-				//echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->expired_end + (get_option('gmt_offset') * 3600));
-				//echo sprintf(__('через %d дней', 'bizpanda'), $subscribeTime);
-				echo '<input type="text" data-user-id="' . $record->user_id . '" data-locker-id="' . $record->locker_id . '" data-default-expired="' . $subscribeTime . '" class="onp-pl-expired-field" value="' . $subscribeTime . '">';
-				echo '<a href="#" class="button button-default onp-pl-offset-left-10 onp-pl-x25-button onp-pl-plus-button">+</button>';
-				echo '<a href="#" class="button button-default onp-pl-x25-button onp-pl-minus-button">-</button>';
-				/*} else {
-					echo '<span style="color:red;">' . __('подписка истекла', 'bizpanda') . '</span>';
-				}*/
-			} else {
 
-				if( $subscribeTime ) {
-					echo sprintf(__('через %d дней', 'bizpanda'), $subscribeTime);
+				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
+				$premiumSubscriber = new OnpPl_PremiumSubscriber($record->user_id);
+
+				if( $premiumSubscriber->hasUserPremium($record->locker_id) ) {
+					echo '<input type="text" data-user-id="' . $record->user_id . '" data-locker-id="' . $record->locker_id . '" data-default-expired="' . $subscribeTime . '" class="onp-pl-expired-field" value="' . $subscribeTime . '">';
+					echo '<a href="#" class="button button-default onp-pl-offset-left-10 onp-pl-x25-button onp-pl-plus-button">+</button>';
+					echo '<a href="#" class="button button-default onp-pl-x25-button onp-pl-minus-button">-</button>';
 				} else {
-					echo '<span style="color:red;">' . __('подписка истекла', 'bizpanda');
+					echo '<span style="color:red;">' . __('подписка истекла', 'plugin-paylocker');
+				}
+			} else {
+				if( $subscribeTime ) {
+					echo sprintf(__('через %d дней', 'plugin-paylocker'), $subscribeTime);
+				} else {
+					echo '<span style="color:red;">' . __('подписка истекла', 'plugin-paylocker');
 				}
 			}
 		}
@@ -386,11 +400,56 @@
 		{
 			global $paylocker;
 			if( !current_user_can('administrator') ) {
-				echo '<a href="' . admin_url('admin.php?page=begin_subscribe-' . $paylocker->pluginName . '&locker_id=' . $record->locker_id) . '" class="button button-default">Продлить подписку</a>';
+				echo '<a href="' . admin_url('admin.php?page=begin_subscribe-' . $paylocker->pluginName . '&locker_id=' . $record->locker_id) . '" class="button button-default">' . __('Продлить подписку', 'plugin-paylocker') . '</a>';
 			} else {
 				//echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=edit&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-primary">Редактировать</a> ';
 				//echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName) . '&action=deactivate&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '" class="button button-default">Деактивировать</a>';
 			}
+		}
+
+		public function column_notify($record)
+		{
+			global $wpdb;
+
+			if( current_user_can('administrator') ) {
+				$result = $wpdb->get_results("
+					SELECT notifications, last_notification_time
+					FROM {$wpdb->prefix}opanda_pl_notifications
+					WHERE user_id = '{$record->user_id}' and locker_id='{$record->locker_id} LIMIT 1'
+				");
+
+				if( empty($result) ) {
+					return __('Не требуется.', 'plugin-paylocker');
+				}
+
+				$notificationsCount = empty($result[0]->notifications)
+					? 0
+					: $result[0]->notifications;
+
+				$possibleCount = (int)trim(get_option('opanda_subscribe_expire_count'));
+				$notifyInterval = (int)trim(get_option('opanda_subscribe_expire_interval'));
+
+				if( empty($possibleCount) || empty($notifyInterval) ) {
+					return __('уведомление не может быть отправлено, настройте интервал и количество уведомлений', 'plugin-paylocker');
+				}
+
+				if( $possibleCount <= $notificationsCount ) {
+					$nextNotification = __('завершено', 'plugin-paylocker');
+				} else {
+					$timeLeft = $result[0]->last_notification_time - strtotime("-{$notifyInterval} days");
+
+					if( $timeLeft < 0 ) {
+						$nextNotification = __('процесс отправки', 'plugin-paylocker');
+					} else {
+
+						$nextNotification = sprintf(__('следующее через %s', 'plugin-paylocker'), gmdate("H:i:s", $timeLeft));
+					}
+				}
+
+				return $notificationsCount . ' <strong>(' . $nextNotification . ')</strong>';
+			}
+
+			return false;
 		}
 
 		public function convertTimetoDays($expired)

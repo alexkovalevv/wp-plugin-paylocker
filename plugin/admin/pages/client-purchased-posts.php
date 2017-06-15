@@ -31,7 +31,7 @@
 				$count = '0';
 			}
 
-			$this->menuTitle = sprintf(__('Покупки (%d)', 'bizpanda'), $count);
+			$this->menuTitle = sprintf(__('Покупки (%d)', 'plugin-paylocker'), $count);
 
 			parent::__construct($plugin);
 		}
@@ -56,10 +56,10 @@
 			?>
 			<div class="wrap factory-fontawesome-000" id="onp-pl-purchased-posts-page">
 				<h2>
-					<?php _e('Мои покупки', 'bizpanda') ?>
+					<?php _e('Мои покупки', 'plugin-paylocker') ?>
 				</h2>
 
-				<p style="margin-top: 0px;"> <?php _e('На этой странице вы можете посмотреть ваши покупки на сайте.', 'bizpanda'); ?></p>
+				<p style="margin-top: 0px;"> <?php _e('На этой странице вы можете посмотреть ваши покупки на сайте.', 'plugin-paylocker'); ?></p>
 
 				<form method="post" action="">
 					<?php echo $table->display(); ?>

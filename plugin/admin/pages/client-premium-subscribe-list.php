@@ -24,7 +24,7 @@
 
 			$this->id = "client_premium_subscribers";
 
-			$this->menuTitle = __('Мои подписки', 'bizpanda');
+			$this->menuTitle = __('Мои подписки', 'plugin-paylocker');
 
 			parent::__construct($plugin);
 		}
@@ -49,7 +49,7 @@
 			?>
 			<div class="wrap factory-fontawesome-000" id="onp-pl-premium-subscribers-page">
 				<h2>
-					<?php _e('Список премиум подписок', 'bizpanda') ?>
+					<?php _e('Список премиум подписок', 'plugin-paylocker') ?>
 				</h2>
 
 				<p><?php _e('На этой странице вы можете посмотреть список всех ваших подписок.'); ?></p>

@@ -43,7 +43,6 @@
 		}
 
 		$tables = get_post_meta($lockerId, 'opanda_pricing_tables_data', true);
-		$tables = json_decode($tables, true);
 
 		if( !isset($tables[$tableName]) ) {
 			return null;

@@ -19,21 +19,32 @@
 			$this->setupLicense();
 
 			// Add user role
-			add_role('pl_premium_subscriber', __('Премиум подписчик', 'bizpanda'), array('read' => true));
+			add_role('pl_premium_subscriber', __('Премиум подписчик', 'plugin-paylocker'), array('read' => true));
 
 			$this->addPost('onp_paylocker_default_id', array(
 				'post_type' => OPANDA_POST_TYPE,
-				'post_title' => __('Замок на "Платный контент"', 'bizpanda'),
+				'post_title' => __('Замок на "Платный контент"', 'plugin-paylocker'),
 				'post_name' => 'onp_paylocker_default'
 			), array(
 				'opanda_item' => 'pay-locker',
-				'opanda_header' => __('Эта часть контента доступна только подписчикам', 'bizpanda'),
-				'opanda_message' => __('Оформите подписку и вы получите, неограниченный доступ ко всем статьям.', 'bizpanda'),
+				'opanda_header' => __('Эта часть контента доступна только подписчикам', 'plugin-paylocker'),
+				'opanda_message' => __('Оформите подписку и вы получите, неограниченный доступ ко всем статьям.', 'plugin-paylocker'),
 				'opanda_style' => 'paylocker',
 				'opanda_is_system' => 1,
 				'opanda_is_default' => 1,
 				'opanda_mobile' => 1
 			));
+
+			// Включаем крон задачу отправки уведомлений, если она еще не включена.
+			if( !wp_next_scheduled('onp_pl_cron_tasks') ) {
+				wp_schedule_event(time(), 'hourly', 'onp_pl_cron_tasks');
+			}
+		}
+
+		public function deactivate()
+		{
+			// Очищаем крон
+			wp_unschedule_event(wp_next_scheduled('onp_pl_cron_tasks'), 'onp_pl_cron_tasks');
 		}
 
 		/**
@@ -93,6 +104,20 @@
 				CHARACTER SET utf8
 				COLLATE utf8_general_ci;";
 			dbDelta($purchases);
+
+			$notifications = "
+				CREATE TABLE {$wpdb->prefix}opanda_pl_notifications (
+				  user_id int(11) NOT NULL,
+				  locker_id int(11) NOT NULL,
+				  notifications int(5) NOT NULL DEFAULT 0,
+				  last_notification_time int(11) NOT NULL DEFAULT 0,
+				  UNIQUE INDEX uq_wp_opanda_pl_notifications (user_id, locker_id)
+				)
+				ENGINE = INNODB
+				CHARACTER SET utf8
+				COLLATE utf8_general_ci;";
+
+			dbDelta($notifications);
 		}
 
 		/**

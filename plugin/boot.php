@@ -8,6 +8,21 @@
 		require_once(PAYLOCKER_DIR . '/plugin/admin/boot.php');
 	}
 
+	function onp_pl_cron_tasks_function()
+	{
+		// Выполняем задания по пользовательским уведомлениям
+		require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.notification.php');
+		$notification = new OnpPl_Notifications();
+		$notification->runShedule();
+
+		// Выполняем задание для проверки истекших премиум подписок
+		require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
+		$subscribe = new OnpPl_Subcribe();
+		$subscribe->runSheduleCheckPremium();
+	}
+
+	add_action('onp_pl_cron_tasks', 'onp_pl_cron_tasks_function');
+
 	// todo: удалить после тестирования
 	//header("Access-Control-Allow-Origin: *");
 
@@ -32,7 +47,7 @@
 		}
 	}
 
-	if( is_user_logged_in() ) {
+	/*if( is_user_logged_in() ) {
 		// Проверяем подписку пользователя
 		require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
 		$premium = new OnpPl_PremiumSubscriber();
@@ -40,7 +55,7 @@
 		if( !$premium->checkUserPremium() ) {
 			$premium->resetUserPremium();
 		}
-	}
+	}*/
 
 	function onp_pl_add_premium_counter_to_admin_bar($wp_admin_bar)
 	{
@@ -53,7 +68,7 @@
 		$args = array(
 			'id' => 'onp-pl-premium-counter',
 			'parent' => 'top-secondary',
-			'title' => __('Приобрести премиум подписку', 'bizpanda'),
+			'title' => __('Приобрести премиум подписку', 'plugin-paylocker'),
 			'href' => admin_url('admin.php?page=begin_subscribe-paylocker'),
 			'meta' => array(
 				'class' => 'onp-pl-buy-premium-bar-button'
@@ -69,7 +84,7 @@
 
 				$subscribeTime = $premium->timeToDayFormat($userPremium['expired_end']);
 
-				$args['title'] = sprintf(__('Премиум подписка истекает через <strong>%s</strong> дней', 'bizpanda'), $subscribeTime);
+				$args['title'] = sprintf(__('Премиум подписка истекает через <strong>%s</strong> дней', 'plugin-paylocker'), $subscribeTime);
 				$args['href'] = admin_url('admin.php?page=client_premium_subscribers-paylocker');
 				$args['meta']['class'] = 'onp-pl-premium-status-default';
 
@@ -93,7 +108,7 @@
 		$args = array(
 			'id' => 'onp-pl-user-purchased-posts',
 			'parent' => 'top-secondary',
-			'title' => sprintf(__('Мои покупки (%s)', 'bizpanda'), $countPurchasedPosts),
+			'title' => sprintf(__('Мои покупки (%s)', 'plugin-paylocker'), $countPurchasedPosts),
 			'href' => admin_url('admin.php?page=user_orders-paylocker')
 		);
 
@@ -148,11 +163,12 @@
 			$options['theme'] .= '-' . $themeColor;
 		}
 
-		$options['groups'] = array('pricing-tables');
+		$options['groups'] = array(
+			'order' => array('pricing-tables')
+		);
 		$options['paylocker'] = array();
 
-		$tables = opanda_get_item_option($lockerId, 'pricing_tables_data');
-		$tables = json_decode($tables, true);
+		$tables = get_post_meta($lockerId, 'opanda_pricing_tables_data', true);
 
 		$orderTables = array();
 
@@ -197,7 +213,7 @@
 		return $options;
 	}
 
-	add_filter('opanda_pay-locker_item_options', 'onp_paylocker_options', 10, 2);
+	add_filter('bizpanda_pay-locker_item_options', 'onp_paylocker_options', 10, 2);
 
 	/**
 	 * Requests assets for email locker.
@@ -213,7 +229,7 @@
 		));
 	}
 
-	add_action('opanda_request_assets_for_pay-locker', 'onp_pl_lockers_assets', 10, 4);
+	add_action('bizpanda_request_assets_for_pay-locker', 'onp_pl_lockers_assets', 10, 4);
 
 	/**
 	 * A shortcode for the Social Locker

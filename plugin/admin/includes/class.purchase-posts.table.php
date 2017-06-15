@@ -98,6 +98,10 @@
 			if( !current_user_can('administrator') ) {
 				$current_user = wp_get_current_user();
 				$where[] = "user_id='" . $current_user->ID . "'";
+			} else if( isset($_GET['sort']) ) {
+				if( $_GET['sort'] === 'user_id' && isset($_GET['user_id']) ) {
+					$where[] = "user_id='" . (int)$_GET['user_id'] . "'";
+				}
 			}
 
 			if( !empty($where) ) {

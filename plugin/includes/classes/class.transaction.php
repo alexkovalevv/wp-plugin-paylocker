@@ -93,8 +93,7 @@
 
 				if( $tablePaymentType == 'subscribe' ) {
 					$tables = get_post_meta($transaction['locker_id'], 'opanda_pricing_tables_data', true);
-					$tables = json_decode($tables, true);
-
+					
 					$tableExpired = 0;
 
 					foreach($tables as $tableName => $table) {
@@ -106,7 +105,7 @@
 					}
 
 					if( empty($tableExpired) ) {
-						return new WP_Error('finish-transaction', __("Не установлен переиод подписки", "bizpanda"));
+						return new WP_Error('finish-transaction', __("Не установлен переиод подписки", 'plugin-paylocker'));
 					}
 
 					require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
@@ -115,7 +114,7 @@
 
 					if( !$premium->addUserPremium($tableExpired, $transaction['locker_id']) ) {
 						self::transactionCancel($transactionId);
-						throw new Exception(__("Ошибка обновления премиум подписки.", "bizpanda"));
+						throw new Exception(__("Ошибка обновления премиум подписки.", 'plugin-paylocker'));
 					}
 				} else if( $tablePaymentType == 'purchase' ) {
 					require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase-posts.php');
@@ -123,13 +122,13 @@
 					$purchase = new OnpPl_PurchasePosts($userId);
 					if( !$purchase->createOrder($transactionId, $transaction['post_id'], $transaction['locker_id'], $transaction['table_price']) ) {
 						self::transactionCancel($transactionId);
-						throw new Exception(__("Ошибка создания покупки.", "bizpanda"));
+						throw new Exception(__("Ошибка создания покупки.", 'plugin-paylocker'));
 					}
 				} else {
-					throw new Exception(__("Неизвестный тип услуги.", "bizpanda"));
+					throw new Exception(__("Неизвестный тип услуги.", 'plugin-paylocker'));
 				}
 			} else {
-				throw new Exception(__("Ошибка изменения статуса транзации.", "bizpanda"));
+				throw new Exception(__("Ошибка изменения статуса транзации.", 'plugin-paylocker'));
 			}
 
 			return $transaction;
@@ -143,7 +142,7 @@
 		{
 			$transaction = self::getTransaction($transactionId);
 			if( empty($transaction) ) {
-				throw new Exception(__("Транзакция не найдена или ее время истекло.", "bizpanda"));
+				throw new Exception(__("Транзакция не найдена или ее время истекло.", 'plugin-paylocker'));
 			}
 
 			if( $transaction['transaction_status'] === 'cancel' ) {

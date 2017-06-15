@@ -15,7 +15,7 @@
 		public function __construct($userId)
 		{
 			if( empty($userId) || empty($userId) ) {
-				throw new Exception(__("Не передан обязательный атрибут userId", "bizpanda"));
+				throw new Exception(__("Не передан обязательный атрибут userId", 'plugin-paylocker'));
 			}
 
 			$this->userId = $userId;
@@ -26,7 +26,7 @@
 			global $wpdb;
 
 			if( empty($postId) ) {
-				throw new Exception(__("Не передан обязательный атрибут postId", "bizpanda"));
+				throw new Exception(__("Не передан обязательный атрибут postId", 'plugin-paylocker'));
 			}
 
 			$result = $wpdb->get_row($wpdb->prepare("

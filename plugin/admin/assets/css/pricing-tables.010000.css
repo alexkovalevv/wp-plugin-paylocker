@@ -23,8 +23,9 @@
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item {
   position: relative;
   display: inline-block;
-  width: 50%;
-  padding: 40px 50px 10px 20px;
+  width: 33.33333%;
+  min-width: 230px;
+  padding: 60px 50px 10px 20px;
   border: 1px dashed #bbbbbb;
   vertical-align: top;
 }
@@ -44,6 +45,18 @@
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-form {
   display: table;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-type,
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-price {
+  top: 15px;
+  bottom: auto;
+  left: auto;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-type {
+  right: 80px;
+}
+#Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item.onp-pl-edit .onp-pl-pg-table-price {
+  right: 165px;
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-form {
   position: relative;
@@ -109,8 +122,8 @@
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-type,
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-price {
   position: absolute;
-  right: 80px;
-  top: 15px;
+  left: 5px;
+  bottom: 10px;
   display: block;
   width: 80px;
   margin-left: 10px;
@@ -127,7 +140,7 @@
   background: #673AB7;
 }
 #Opanda_PricingTablesMetabox .onp-pl-pg-tables .onp-pl-pg-tables-item .onp-pl-pg-table-price {
-  right: 165px;
+  left: 90px;
   min-width: 60px;
   width: auto;
   background: #E91E63;
@@ -142,11 +155,12 @@
 }
 #Opanda_PricingTablesMetabox .factory-bootstrap-000 .sortable-placeholder {
   display: inline-block;
-  height: 52px;
+  height: 70px;
   margin: 0;
   line-height: 0;
   padding: 0;
-  width: 50%;
+  width: 33.3333333%;
+  min-width: 230px;
   clear: both;
   vertical-align: top;
 }

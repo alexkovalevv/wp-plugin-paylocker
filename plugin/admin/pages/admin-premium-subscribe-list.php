@@ -27,7 +27,7 @@
 				$count = '0';
 			}
 
-			$this->menuTitle = sprintf(__('Подписки (%d)', 'bizpanda'), $count);
+			$this->menuTitle = sprintf(__('Подписки (%d)', 'plugin-paylocker'), $count);
 
 			parent::__construct($plugin);
 		}
@@ -53,7 +53,8 @@
 
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.premium-subscribers.010000.css');
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.begin-subscribe.010000.css');
-			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.add-user-premium.010000.js');
+			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/load-tables-data.010000.js');
+			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/create-subscribe.010000.js');
 			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.admin-premium-subscribers.010000.js');
 		}
 
@@ -95,7 +96,7 @@
 			?>
 			<div class="wrap factory-fontawesome-000" id="onp-pl-premium-subscribers-page">
 				<h2>
-					<?php _e('Список премиум подписок', 'bizpanda') ?>
+					<?php _e('Список премиум подписок', 'plugin-paylocker') ?>
 				</h2>
 
 				<p><?php _e('На этой странице вы можете посмотреть список всех пользователей, которые имеют премиум подписку.'); ?></p>
@@ -107,7 +108,7 @@
 				</div>
 
 				<?php
-					$table->search_box(__('Найти пользователя', 'bizpanda'), 's');
+					$table->search_box(__('Найти пользователя', 'plugin-paylocker'), 's');
 					$table->views();
 				?>
 
@@ -125,8 +126,8 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'subscribe_locker',
-				'title' => __('Выберите подписку*', 'bizpanda'),
-				'hint' => __('Выберите из списка нужную вам подписку.', 'bizpanda'),
+				'title' => __('Выберите подписку*', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужную вам подписку.', 'plugin-paylocker'),
 				'cssClass' => isset($_GET['locker_id'])
 					? 'onp-pl-hide-control'
 					: '',
@@ -139,8 +140,8 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'table_name',
-				'title' => __('Выберите тариф*', 'bizpanda'),
-				'hint' => __('Выберите из списка нужный вам тариф.', 'bizpanda'),
+				'title' => __('Выберите тариф*', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужный вам тариф.', 'plugin-paylocker'),
 				'data' => array()
 			);
 
@@ -156,8 +157,8 @@
 			$options[] = array(
 				'type' => 'textbox',
 				'name' => 'user_name',
-				'title' => __('Имя пользователя*' . '', 'bizpanda'),
-				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'bizpanda'),
+				'title' => __('Имя пользователя*' . '', 'plugin-paylocker'),
+				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'plugin-paylocker'),
 				'value' => $userName,
 				'cssClass' => !empty($userName)
 					? 'onp-pl-hide-control'
@@ -188,10 +189,20 @@
 			$this->saveUserPremium();
 
 			?>
+			
+			<script>
+				if( window.__paylocker === void 0 ) {
+					window.__paylocker = {};
+				}
+				__paylocker.lang_interface = {
+					loading: '<?php _e('Загрузка', 'plugin-paylocker'); ?>'
+				};
+			</script>
+
 			<div class="wrap" id="onp-pl-begin-subscribe-page">
 				<div class="factory-bootstrap-000">
 					<h2>
-						<?php _e('Добавление подписки для пользователя', 'bizpanda') ?>
+						<?php _e('Добавление подписки для пользователя', 'plugin-paylocker') ?>
 					</h2>
 
 					<p><?php _e('На этой странице вы можете посмотреть список всех пользователей, которые имеют премиум подписку.'); ?></p>
@@ -199,28 +210,28 @@
 					<form method="POST" id="onp-pl-add-subscribe-form" class="form-horizontal" action="">
 						<?php if( isset($_GET['opanda_saved']) ) { ?>
 							<div id="message" class="alert alert-success">
-								<p><?php _e('Подписка успешно добавлена!', 'bizpanda') ?></p>
+								<p><?php _e('Подписка успешно добавлена!', 'plugin-paylocker') ?></p>
 							</div>
 						<?php } ?>
 
 						<?php if( isset($_GET['opanda_error_code']) ): ?>
 							<div id="message" class="alert alert-danger">
 								<p>
-									<?php _e('Возникла ошибка при сохранении данных!', 'bizpanda'); ?>
+									<?php _e('Возникла ошибка при сохранении данных!', 'plugin-paylocker'); ?>
 									<?php if( $_GET['opanda_error_code'] == 'locker_is_not_selected' ): ?>
-										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'bizpanda') ?>
+										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_user_name' ): ?>
-										<?php _e('Вы должны заполнить поле "Имя пользователя"' . '.', 'bizpanda') ?>
+										<?php _e('Вы должны заполнить поле "Имя пользователя"' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_table_expired' ): ?>
-										<?php _e('Не установлен период подписки или он равняется нулю.' . '.', 'bizpanda') ?>
+										<?php _e('Не установлен период подписки или он равняется нулю.' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'user_not_found' ): ?>
-										<?php _e('Пользователь с таким именем не найден.' . '.', 'bizpanda') ?>
+										<?php _e('Пользователь с таким именем не найден.' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'save_error' ): ?>
-										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'bizpanda') ?>
+										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 								</p>
 							</div>
@@ -234,7 +245,7 @@
 							<label class="col-sm-2 control-label"> </label>
 
 							<div class="control-group controls col-sm-10">
-								<input id="onp-pl-add-subscribe-button" name="onp_pl_add_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Добавить подписку', 'bizpanda') ?>"/>
+								<input id="onp-pl-add-subscribe-button" name="onp_pl_add_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Добавить подписку', 'plugin-paylocker') ?>"/>
 							</div>
 						</div>
 					</form>
@@ -333,8 +344,8 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'subscribe_locker',
-				'title' => __('Выберите подписку*', 'bizpanda'),
-				'hint' => __('Выберите из списка нужную вам подписку.', 'bizpanda'),
+				'title' => __('Выберите подписку*', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужную вам подписку.', 'plugin-paylocker'),
 				'cssClass' => !empty($lockerId)
 					? 'onp-pl-hide-control'
 					: '',
@@ -348,13 +359,13 @@
 				if( !empty($current_user) ) {
 					$userName = $current_user->data->user_login;
 				} else {
-					wp_die(__('Ошибка! Пользователь не найден.', 'bizpanda'));
+					wp_die(__('Ошибка! Пользователь не найден.', 'plugin-paylocker'));
 					exit;
 				}
 			}
 
 			if( empty($userId) || empty($lockerId) ) {
-				wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'bizpanda'));
+				wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'plugin-paylocker'));
 				exit;
 			}
 
@@ -364,15 +375,15 @@
 					WHERE user_id='{$userId}' AND locker_id='{$lockerId}'");
 
 			if( empty($subscribeExpiredEnd) ) {
-				wp_die(__('Ошибка! Подписка не найдена.', 'bizpanda'));
+				wp_die(__('Ошибка! Подписка не найдена.', 'plugin-paylocker'));
 				exit;
 			}
 
 			$options[] = array(
 				'type' => 'textbox',
 				'name' => 'expired_end',
-				'title' => __('Подписка истекает' . '', 'bizpanda'),
-				'hint' => __('Выберите дату, когда истекает подписка.', 'bizpanda'),
+				'title' => __('Подписка истекает' . '', 'plugin-paylocker'),
+				'hint' => __('Выберите дату, когда истекает подписка.', 'plugin-paylocker'),
 				'value' => date('d.m.Y', $subscribeExpiredEnd),
 				'htmlAttrs' => array(
 					'data-provide' => 'datepicker-inline',
@@ -384,8 +395,8 @@
 			$options[] = array(
 				'type' => 'textbox',
 				'name' => 'user_name',
-				'title' => __('Имя пользователя*' . '', 'bizpanda'),
-				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'bizpanda'),
+				'title' => __('Имя пользователя*' . '', 'plugin-paylocker'),
+				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'plugin-paylocker'),
 				'value' => $userName,
 				'cssClass' => !empty($userName)
 					? 'onp-pl-hide-control'
@@ -417,7 +428,7 @@
 				}
 
 				if( empty($userId) || empty($lockerId) ) {
-					wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'bizpanda'));
+					wp_die(__('Ошибка! Не переданы обязательные параметры locker_id или user_id', 'plugin-paylocker'));
 					exit;
 				}
 
@@ -437,7 +448,7 @@
 			<div class="wrap" id="onp-pl-begin-subscribe-page">
 				<div class="factory-bootstrap-000">
 					<h2>
-						<?php _e('Редактирование подписки пользователя', 'bizpanda') ?>
+						<?php _e('Редактирование подписки пользователя', 'plugin-paylocker') ?>
 					</h2>
 
 					<p><?php _e('На этой странице вы можете откредактировать подписку пользователя.'); ?></p>
@@ -445,22 +456,22 @@
 					<form method="POST" id="onp-pl-add-subscribe-form" class="form-horizontal" action="">
 						<?php if( isset($_GET['opanda_saved']) ) { ?>
 							<div id="message" class="alert alert-success">
-								<p><?php _e('Подписка успешно добавлена!', 'bizpanda') ?></p>
+								<p><?php _e('Подписка успешно добавлена!', 'plugin-paylocker') ?></p>
 							</div>
 						<?php } ?>
 
 						<?php if( isset($_GET['opanda_error_code']) ): ?>
 							<div id="message" class="alert alert-danger">
 								<p>
-									<?php _e('Возникла ошибка при обновлении данных!', 'bizpanda'); ?>
+									<?php _e('Возникла ошибка при обновлении данных!', 'plugin-paylocker'); ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_subscribe_date' ): ?>
-										<?php _e('Не установлена дата окончания платной подписки.', 'bizpanda') ?>
+										<?php _e('Не установлена дата окончания платной подписки.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'incorrect_subscribe_date' ): ?>
-										<?php _e('Введен некорректный формат даты.', 'bizpanda') ?>
+										<?php _e('Введен некорректный формат даты.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'unexpected_error' ): ?>
-										<?php _e('Неизвестная ошибка.', 'bizpanda') ?>
+										<?php _e('Неизвестная ошибка.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 								</p>
 							</div>
@@ -474,7 +485,7 @@
 							<label class="col-sm-2 control-label"> </label>
 
 							<div class="control-group controls col-sm-10">
-								<input id="onp-pl-add-subscribe-button" name="onp_pl_edit_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Обновить подписку', 'bizpanda') ?>"/>
+								<input id="onp-pl-add-subscribe-button" name="onp_pl_edit_subscribe" class="btn btn-primary" type="submit" value="<?php _e('Обновить подписку', 'plugin-paylocker') ?>"/>
 							</div>
 						</div>
 					</form>

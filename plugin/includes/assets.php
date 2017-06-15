@@ -10,7 +10,8 @@
 	{
 		global $post;
 
-		wp_enqueue_script('paylocker-core', PAYLOCKER_URL . '/plugin/assets/js/paylocker.010001' . '.js', array('opanda-lockers'), false, true);
+		wp_enqueue_script('paylocker-core', PAYLOCKER_URL . '/plugin/assets/js/paylocker.010001.js', array('opanda-lockers'), false, true);
+		wp_enqueue_script('opanda-migration-rus-to-en', PAYLOCKER_URL . '/plugin/assets/js/migration-rus-to-en.010001.min.js', array('opanda-lockers'), false, true);
 		wp_enqueue_script('paylocker-helpers', PAYLOCKER_URL . '/plugin/assets/js/paylocker-helpers.010000.js', array(
 			'opanda-lockers',
 			'paylocker-core'
@@ -21,7 +22,8 @@
 			'adminEmail' => get_option('admin_email')
 		));
 
-		wp_enqueue_style('paylocker-style', PAYLOCKER_URL . '/plugin/assets/css/paylocker.1.0.0.min.css');
+		wp_enqueue_style('paylocker-style', PAYLOCKER_URL . '/plugin/assets/css/paylocker.010001.min.css');
+		wp_enqueue_style('opanda-migration-rus-to-en', PAYLOCKER_URL . '/plugin/assets/css/migration-rus-to-en.010001.min.css');
 
 		$rand = time();
 		wp_enqueue_script('onp-pl-visibility-vars', site_url() . '?onp_pl_visibility_vars=' . $rand . '&post_id=' . $post->ID, array('opanda-lockers'), false, true);

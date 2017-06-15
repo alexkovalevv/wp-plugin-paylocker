@@ -1,9 +1,7 @@
 <?php
-
+	#comp merge
 	require PAYLOCKER_DIR . '/plugin/admin/pages/settings.php';
 	require PAYLOCKER_DIR . '/plugin/admin/metaboxes/basic-options.php';
-
-	#comp merge
 	require(PAYLOCKER_DIR . '/plugin/admin/activation.php');
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/license-manager.php');
 	//require(SOCIALLOCKER_DIR . '/plugin/admin/notices.php');
@@ -14,18 +12,75 @@
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/begin-subscribe.php');
 	#endcomp
 
+	add_filter('manage_users_columns', 'pippin_add_user_id_column');
+
+	function pippin_add_user_id_column($columns)
+	{
+		$columns['user_paylocker'] = __('Платный контент', 'plugin-paylocker');
+
+		return $columns;
+	}
+
+	add_action('manage_users_custom_column', 'pippin_show_user_id_column_content', 10, 3);
+
+	function pippin_show_user_id_column_content($value, $column_name, $user_id)
+	{
+		if( 'user_paylocker' == $column_name ) {
+			$purchasePageUrl = admin_url('edit.php?post_type=opanda-item&page=purchased_posts-paylocker&sort=user_id&user_id=' . $user_id);
+			$subscribePageUrl = admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-paylocker&sort=user_id&user_id=' . $user_id);
+
+			return '<a href="' . $purchasePageUrl . '" class="button button-default">' . __('Покупки', 'plugin-paylocker') . '</a> ' . ' <a href="' . $subscribePageUrl . '" class="button button-default">' . __('Подписки', 'plugin-paylocker') . '</a>';
+		}
+
+		return $value;
+	}
+
 	/**
 	 * Добавляем скрипты paylocker в превью
 	 */
 	function onp_pl_print_scripts_to_locker_preview()
 	{
 		?>
+		<script type="text/javascript" src="<?php echo PAYLOCKER_URL; ?>/plugin/assets/js/migration-rus-to-en.010001.min.js"></script>
 		<script type="text/javascript" src="<?php echo PAYLOCKER_URL; ?>/plugin/assets/js/paylocker.010001.js"></script>
-		<link rel="stylesheet" type="text/css" href="<?php echo PAYLOCKER_URL ?>/plugin/assets/css/paylocker.1.0.0.min.css">
+		<link rel="stylesheet" type="text/css" href="<?php echo PAYLOCKER_URL ?>/plugin/assets/css/paylocker.010001.min.css">
+		<link rel="stylesheet" type="text/css" href="<?php echo PAYLOCKER_URL ?>/plugin/assets/css/migration-rus-to-en.010001.min.css">
+
+		<script>
+			(function($) {
+
+				/**
+				 * Моментальное обновления тарифных таблиц, без перезагрузки превью
+				 */
+				$.pandalocker.hooks.add('opanda-init', function(e, locker) {
+					locker.update = function() {
+						locker.runHook('paylocker-update-options');
+
+						locker.defaultScreen.html('');
+						locker._initGroups();
+
+						// creates markup for buttons
+						for( var i = 0; i < locker._groups.length; i++ ) {
+							locker._groups[i].renderGroup(locker.defaultScreen);
+						}
+
+						locker.runHook('paylocker-updated');
+					};
+				});
+
+				/**
+				 * Обновляем размеры превью, после того, как замок был обновлен
+				 */
+				$.pandalocker.hooks.add('opanda-paylocker-updated', function() {
+					window.alertFrameSize();
+				});
+
+			})(__$onp);
+		</script>
 	<?php
 	}
 
-	add_action('onp_sl_preview_head', 'onp_pl_print_scripts_to_locker_preview');
+	add_action('bizpanda_print_scripts_to_preview_head', 'onp_pl_print_scripts_to_locker_preview');
 
 	/**
 	 * Изменяем позицую для пунктов меню в админ панели
@@ -73,10 +128,10 @@
 			return $title;
 		}
 
-		return __('Платный контент', 'bizpanda');
+		return __('Платный контент', 'plugin-paylocker');
 	}
 
-	add_filter('opanda_menu_title', 'onp_pl_change_menu_title');
+	add_filter('bizpanda_menu_title', 'onp_pl_change_menu_title');
 
 	/**
 	 * Changes the menu icon if the Social Locker is an only plugin installed from BizPanda.
@@ -93,7 +148,7 @@
 		return PAYLOCKER_URL . '/plugin/admin/assets/img/menu-icon.png';
 	}
 
-	add_filter('opanda_menu_icon', 'onp_pl_change_menu_icon');
+	add_filter('bizpanda_menu_icon', 'onp_pl_change_menu_icon');
 
 	/**
 	 * Changes the shortcode icon if the Social Locker is an only plugin installed from BizPanda.
@@ -110,7 +165,7 @@
 		return PAYLOCKER_URL . '/plugin/admin/assets/img/shortcode-icon.png';
 	}
 
-	add_filter('opanda_shortcode_icon', 'onp_pl_change_shortcode_icon');
+	add_filter('bizpanda_shortcode_icon', 'onp_pl_change_shortcode_icon');
 
 	/**
 	 * Changes the menu title of the page 'New Item' if the Social Locker is an only plugin installed from BizPanda.
@@ -124,7 +179,7 @@
 			return $title;
 		}
 
-		return __('+ New Locker', 'bizpanda');
+		return __('+ Добавить новый', 'plugin-paylocker');
 	}
 
 	add_filter('factory_menu_title_new-item-opanda', 'onp_pl_change_new_item_menu_title');
@@ -140,13 +195,13 @@
 		if( !BizPanda::isSinglePlugin() ) {
 			return $labels;
 		}
-		$labels['all_items'] = __('All Lockers', 'bizpanda');
-		$labels['add_new'] = __('+ New Locker', 'bizpanda');
+		$labels['all_items'] = __('Все замки', 'plugin-paylocker');
+		$labels['add_new'] = __('+ Добавить новый', 'plugin-paylocker');
 
 		return $labels;
 	}
 
-	add_filter('opanda_items_lables', 'onp_pl_change_items_lables');
+	add_filter('bizpanda_items_lables', 'onp_pl_change_items_lables');
 
 	/**
 	 * Makes internal page "License Manager" for the Social Locker
@@ -177,9 +232,9 @@
 		$items[] = array(
 			'name' => 'paylocker',
 			'type' => 'premium',
-			'title' => __('Платный контент', 'bizpanda'),
-			'description' => __('<p>Helps to attract social traffic and improve spreading your content in social networks.</p><p>Also extends the Sign-In Locker by adding social actions you can set up to be performed.</p>', 'bizpanda'),
-			'upgradeToPremium' => __('<p>A premium version of the plugin Social Locker.</p><p>7 Social Buttons, 5 Beautiful Themes, Blurring Effect, Countdown Timer, Close Cross and more!</p>', 'bizpanda'),
+			'title' => __('Платный контент', 'plugin-paylocker'),
+			'description' => __('<p>Этот плагин монетизирует ваш сайт за счет продажи вашего контента.</p><p>Имеет возможность платной подписки и разовых продаж.</p>', 'plugin-paylocker'),
+			//'upgradeToPremium' => __('<p>A premium version of the plugin Social Locker.</p><p>7 Social Buttons, 5 Beautiful Themes, Blurring Effect, Countdown Timer, Close Cross and more!</p>', 'plugin-paylocker'),
 			'url' => 'https://sociallocker.ru/',
 			'tags' => array(),
 			'pluginName' => 'paylocker'
@@ -188,7 +243,7 @@
 		return $items;
 	}
 
-	add_filter('opanda_register_plugins', 'onp_pl_register_plugin', 1);
+	add_filter('bizpanda_register_plugins', 'onp_pl_register_plugin', 1);
 
 	/**
 	 * Регистрируем новый тип замка
@@ -199,14 +254,14 @@
 	{
 		global $paylocker;
 
-		$title = __('Платный контент', 'bizpanda');
+		$title = __('Платный контент', 'plugin-paylocker');
 
 		$items['pay-locker'] = array(
 			'name' => 'pay-locker',
 			'type' => 'premium',
 			'title' => $title,
 			'help' => opanda_get_help_url('paylocker'),
-			'description' => '<p>' . __('Этот тип замков предоставляет доступ к контенту, только для пользователей оформивших премиум подписку.', 'bizpanda') . '</p>',
+			'description' => '<p>' . __('Этот тип замков предоставляет доступ к контенту, только для пользователей оформивших премиум подписку.', 'plugin-paylocker') . '</p>',
 			'shortcode' => 'paylocker',
 			'plugin' => $paylocker
 		);
@@ -214,7 +269,7 @@
 		return $items;
 	}
 
-	add_filter('opanda_items', 'onp_pl_register_paylocker_item', 1);
+	add_filter('bizpanda_items', 'onp_pl_register_paylocker_item', 1);
 
 	/**
 	 * Создаем доплнительные опции принудительно для всех платных замков
@@ -223,7 +278,7 @@
 	function onp_pl_save_post_callback($postId)
 	{
 		global $post;
-		if( $post->post_type != 'opanda-item' ) {
+		if( empty($post) || $post->post_type != 'opanda-item' ) {
 			return;
 		}
 
@@ -249,13 +304,13 @@
 		$hideForAdmin = get_post_meta($postId, 'opanda_hide_for_admin', true);
 
 		if( !empty($hideForAdmin) && $lockerType == 'pay-locker' ) {
-			echo '<li>' . __('Скрыт для администратора: <strong>да</strong>', 'bizpanda') . '</li>';
+			echo '<li>' . __('Скрыт для администратора: <strong>да</strong>', 'plugin-paylocker') . '</li>';
 		} else if( $empty ) {
 			echo '<li>—</li>';
 		}
 	}
 
-	add_action('opanda_print_simple_visibility_options', 'onp_pl_print_simple_visibility_options', 10, 2);
+	add_action('bizpanda_print_simple_visibility_options', 'onp_pl_print_simple_visibility_options', 10, 2);
 
 	/**
 	 * Registers metaboxes for Social Locker.
@@ -288,7 +343,7 @@
 		return $restructuringMetaboxes;
 	}
 
-	add_filter('opanda_pay-locker_type_metaboxes', 'onp_pl_metaboxes', 10, 1);
+	add_filter('bizpanda_pay-locker_type_metaboxes', 'onp_pl_metaboxes', 10, 1);
 
 	function onp_pl_visability_option($options)
 	{
@@ -301,14 +356,14 @@
 
 		if( $lockerType == 'pay-locker' ) {
 			foreach($options as $key => $option) {
-				if( $option['id'] == 'bp-simple-visibility-options' ) {
+				if( isset($option['id']) && $option['id'] == 'bp-simple-visibility-options' ) {
 					unset($options[$key]['items']);
 					$options[$key]['items'][] = array(
 						'type' => 'checkbox',
 						'way' => 'buttons',
 						'name' => 'hide_for_admin',
-						'title' => __('Скрыть для администраторов', 'bizpanda'),
-						'hint' => __('Если Вкл, то замок будет скрыт для администраторов.', 'bizpanda'),
+						'title' => __('Скрыть для администраторов', 'plugin-paylocker'),
+						'hint' => __('Если Вкл, то замок будет скрыт для администраторов.', 'plugin-paylocker'),
 						'icon' => OPANDA_BIZPANDA_URL . '/assets/admin/img/member-icon.png',
 						'default' => false
 					);
@@ -319,7 +374,7 @@
 		return $options;
 	}
 
-	add_filter('opanda_visability_options', 'onp_pl_visability_option', 10, 1);
+	add_filter('bizpanda_visability_options', 'onp_pl_visability_option', 10, 1);
 
 	/**
 	 * Registers default themes.
@@ -347,20 +402,9 @@
 				array('forest', '#c9d4be'),
 			)
 		));
-
-		OPanda_ThemeManager::registerTheme(array(
-			'name' => 'testest',
-			'title' => 'TestTest',
-			//'path' => OPANDA_BIZPANDA_DIR . '/themes/starter',
-			'items' => array('pay-locker'),
-			'colors' => array(
-				array('default', '#75649b'),
-				array('black', '#222')
-			)
-		));
 	}
 
-	add_action('onp_sl_register_themes', 'opanda_register_paylocker_themes');
+	add_action('bizpanda_register_themes', 'opanda_register_paylocker_themes');
 
 	/**
 	 * Registers the quick tags for the wp editors.

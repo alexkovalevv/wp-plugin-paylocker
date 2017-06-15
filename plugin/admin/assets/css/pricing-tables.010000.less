@@ -26,12 +26,10 @@
     .onp-pl-pg-tables-item {
       position: relative;
       display: inline-block;
-      //float: left;
-      width: 50%;
-      padding: 40px 50px 10px 20px;
+      width: 33.33333%;
+      min-width: 230px;
+      padding: 60px 50px 10px 20px;
       border: 1px dashed #bbbbbb;
-      //margin-bottom: 1px;
-      // margin-left: 1px;
       vertical-align: top;
       &.onp-pl-fullwidth {
         width: 100%;
@@ -48,6 +46,20 @@
         z-index: 9;
         .onp-pl-pg-table-form {
           display: table;
+        }
+
+        .onp-pl-pg-table-type, .onp-pl-pg-table-price {
+          top: 15px;
+          bottom: auto;
+          left: auto;
+        }
+
+        .onp-pl-pg-table-type {
+          right: 80px;
+        }
+
+        .onp-pl-pg-table-price {
+          right: 165px;
         }
       }
 
@@ -121,8 +133,8 @@
       }
       .onp-pl-pg-table-type, .onp-pl-pg-table-price {
         position: absolute;
-        right: 80px;
-        top: 15px;
+        left: 5px;
+        bottom: 10px;
         display: block;
         width: 80px;
         margin-left: 10px;
@@ -141,7 +153,7 @@
       }
 
       .onp-pl-pg-table-price {
-        right: 165px;
+        left: 90px;
         min-width: 60px;
         width: auto;
         background: #E91E63;
@@ -159,11 +171,12 @@
 
   .factory-bootstrap-000 .sortable-placeholder {
     display: inline-block;
-    height: 52px;
+    height: 70px;
     margin: 0;
     line-height: 0;
     padding: 0;
-    width: 50%;
+    width: 33.3333333%;
+    min-width: 230px;
     clear: both;
     vertical-align: top;
 

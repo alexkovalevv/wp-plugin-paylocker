@@ -16,4 +16,4 @@
 		return 'locker';
 	}
 
-	add_filter('onp_sl_what_to_show', 'onp_pl_what_to_show', 10, 2);
+	add_filter('bizpanda_shortcodes_what_to_show', 'onp_pl_what_to_show', 10, 2);

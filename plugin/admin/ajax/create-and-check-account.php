@@ -113,7 +113,8 @@
 			if( !$forceRegisterUser ) {
 				echo json_encode(array(
 					'warning' => __('Email пользователя не зарегистрирован.', 'bizpanda'),
-					'code' => 'email_not_exists'
+					'code' => 'email_not_exists',
+					'email' => $email
 				));
 				exit;
 			}

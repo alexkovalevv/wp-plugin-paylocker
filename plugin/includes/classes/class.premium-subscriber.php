@@ -23,7 +23,7 @@
 			}
 
 			if( empty($this->userId) ) {
-				throw new Exception(__("Не передан обязательный атрибут userId", "bizpanda"));
+				throw new Exception(__("Не передан обязательный атрибут userId", 'plugin-paylocker'));
 			}
 		}
 
@@ -168,7 +168,7 @@
 			global $wpdb;
 
 			if( empty($lockerId) ) {
-				throw new Exception(__("Не передан обязательный атрибут lockerId", "bizpanda"));
+				throw new Exception(__("Не передан обязательный атрибут lockerId", 'plugin-paylocker'));
 			}
 
 			return $wpdb->get_row($wpdb->prepare("

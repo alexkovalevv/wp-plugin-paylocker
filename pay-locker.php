@@ -4,7 +4,7 @@
 	 * Plugin URI: {comp:pluginUrl}
 	 * Description: {comp:description}
 	 * Author: Alex Kovalevv <alex.kovalevv@gmail.com>
-	 * Version: 1.0.1
+	 * Version: 1.0.2
 	 * Author URI: http://byonepress.com
 	 */
 
@@ -97,6 +97,10 @@
 			return;
 		}
 
+		if( onp_lang('en_US') ) {
+			load_textdomain('plugin-paylocker', PAYLOCKER_DIR . '/langs/paylocker-' . LANG_TYPE . '.mo');
+		}
+
 		// enabling features the plugin requires
 
 		BizPanda::enableFeature('lockers');
@@ -107,8 +111,8 @@
 
 		$paylocker = new Factory000_Plugin(__FILE__, array(
 			'name' => 'paylocker',
-			'title' => __('Платный контент', 'bizpanda'),
-			'version' => '1.0.1',
+			'title' => __('Платный контент', 'plugin-paylocker'),
+			'version' => '1.0.2',
 			'assembly' => BUILD_TYPE,
 			'lang' => LANG_TYPE,
 			'api' => 'http://api.byonepress.com/1.1/',

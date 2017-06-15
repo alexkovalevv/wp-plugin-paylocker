@@ -11,14 +11,14 @@
 		$options[] = array(
 			'type' => 'textbox',
 			'name' => 'locker_help_url',
-			'title' => __('Ссылка на страницу справки', 'bizpanda'),
-			'hint' => __('Если установлен адрес ссылки на страницу справки, то в углу замка появляется ссылка "Помощь" ведущая на установенный адрес.', 'bizpanda'),
+			'title' => __('Ссылка на страницу справки', 'plugin-paylocker'),
+			'hint' => __('Если установлен адрес ссылки на страницу справки, то в углу замка появляется ссылка "Помощь" ведущая на установенный адрес.', 'plugin-paylocker'),
 		);
 
 		return $options;
 	}
 
-	add_filter('opanda_basic_options_text_section', 'onp_pl_add_new_basic_options_text_section');
+	add_filter('bizpanda_basic_options_text_section', 'onp_pl_add_new_basic_options_text_section');
 
 	function onp_pl_add_new_basic_options_style_section($options)
 	{
@@ -48,15 +48,15 @@
 				),*/
 				'default' => 'default',
 			),
-			'title' => __('Theme', 'bizpanda'),
-			'hint' => __('Select the most suitable theme.', 'bizpanda'),
+			'title' => __('Theme', 'plugin-paylocker'),
+			'hint' => __('Select the most suitable theme.', 'plugin-paylocker'),
 
 		);
 
 		return $options;
 	}
 
-	add_filter('opanda_basic_options_style_section', 'onp_pl_add_new_basic_options_style_section');
+	add_filter('bizpanda_basic_options_style_section', 'onp_pl_add_new_basic_options_style_section');
 
 	/**
 	 * @param Factory000_AssetsList $scripts
@@ -75,4 +75,4 @@
 		), 'bootstrap');
 	}
 
-	add_action('opanda_panda-item_edit_assets', 'onp_pl_add_scripts_to_page_edit_item', 10, 2);
+	add_action('bizpanda_panda-item_edit_assets', 'onp_pl_add_scripts_to_page_edit_item', 10, 2);

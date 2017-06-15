@@ -31,12 +31,11 @@
 
 		if( empty($tables) ) {
 			echo json_encode(array(
-				'error' => __('Тарифных таблиц не существует', 'bizpanda'),
+				'error' => __('[Внимание]: Тарифных таблиц не существует', 'bizpanda'),
 				'error_code' => 'pricing_tables_not_found'
 			));
 			exit;
 		}
-		$tables = json_decode($tables, true);
 
 		$result = array();
 		foreach($tables as $tableName => $table) {

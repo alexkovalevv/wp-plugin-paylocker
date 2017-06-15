@@ -30,7 +30,7 @@
 				$count = '0';
 			}
 
-			$this->menuTitle = sprintf(__('Покупки записей (%d)', 'bizpanda'), $count);
+			$this->menuTitle = sprintf(__('Покупки записей (%d)', 'plugin-paylocker'), $count);
 
 			parent::__construct($plugin);
 		}
@@ -57,14 +57,13 @@
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.premium-subscribers.010000.css');
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.begin-subscribe.010000.css');
 
-			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/create-order.010000.js');
-
 			$this->styles->add(OPANDA_BIZPANDA_URL . '/assets/admin/css/libs/select2.css');
 
 			$this->scripts->add(OPANDA_BIZPANDA_URL . '/assets/admin/js/libs/select2/select2.min.js');
 			$this->scripts->add(OPANDA_BIZPANDA_URL . '/assets/admin/js/libs/select2/i18n/ru.js');
 
-			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.add-user-order.010000.js');
+			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/load-tables-data.010000.js');
+			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/create-order.010000.js');
 		}
 
 		public function indexAction()
@@ -80,16 +79,18 @@
 			$table->prepare_items();
 
 			?>
+
+
 			<div class="wrap factory-fontawesome-000" id="onp-pl-purchased-posts-page">
 				<h2>
-					<?php _e('Список покупок пользователей', 'bizpanda') ?>
+					<?php _e('Список покупок пользователей', 'plugin-paylocker') ?>
 				</h2>
 
-				<p style="margin-top: 0px;"> <?php _e('На этой странице вы можете посмотреть покупки ваших пользователей.', 'bizpanda'); ?></p>
+				<p style="margin-top: 0px;"> <?php _e('На этой странице вы можете посмотреть покупки ваших пользователей.', 'plugin-paylocker'); ?></p>
 
 				<div style="clear: both;">
 					<a href="<?= admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName . '&action=createOrder'); ?>" class="button button-primary">
-						Добавить покупку
+						<?php _e('Добавить покупку', 'plugin-paylocker'); ?>
 					</a>
 				</div>
 				<form method="post" action="">
@@ -108,24 +109,24 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'subscribe_locker',
-				'title' => __('Выберите замок', 'bizpanda'),
-				'hint' => __('Выберите из списка нужный замок.', 'bizpanda'),
+				'title' => __('Выберите замок', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужный замок.', 'plugin-paylocker'),
 				'data' => 'onp_pl_get_lockers_list'
 			);
 
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'table_name',
-				'title' => __('Выберите тариф', 'bizpanda'),
-				'hint' => __('Выберите из списка нужную вам тарифную таблицу.', 'bizpanda'),
+				'title' => __('Выберите тариф', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужную вам тарифную таблицу.', 'plugin-paylocker'),
 				'data' => array()
 			);
 
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'selected_posts[]',
-				'title' => __('ID записей', 'bizpanda'),
-				'hint' => __('Введите часть заголовка записи, чтобы быстро найти ее ID.', 'bizpanda'),
+				'title' => __('ID записей', 'plugin-paylocker'),
+				'hint' => __('Введите часть заголовка записи, чтобы быстро найти ее ID.', 'plugin-paylocker'),
 				'htmlAttrs' => array(
 					'multiple' => 'multiple'
 				),
@@ -146,8 +147,8 @@
 				'type' => 'list',
 				'way' => 'checklist',
 				'name' => 'searche_post_types',
-				'title' => __('Типы записей' . '', 'bizpanda'),
-				'hint' => __('Выберите типы записей, в которых будет производится поиск ID.', 'bizpanda'),
+				'title' => __('Типы записей' . '', 'plugin-paylocker'),
+				'hint' => __('Выберите типы записей, в которых будет производится поиск ID.', 'plugin-paylocker'),
 				'data' => $postTypesChecklist,
 				'value' => 'post,page'
 			);
@@ -155,8 +156,8 @@
 			$options[] = array(
 				'type' => 'textbox',
 				'name' => 'user_name',
-				'title' => __('Имя пользователя' . '', 'bizpanda'),
-				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'bizpanda')
+				'title' => __('Имя пользователя' . '', 'plugin-paylocker'),
+				'hint' => __('Введите логин пользователя, чтобы присвоить ему подписку. Например bredly122', 'plugin-paylocker')
 			);
 
 			// creating a form
@@ -243,40 +244,50 @@
 			}
 
 			?>
+
+			<script>
+				if( window.__paylocker === void 0 ) {
+					window.__paylocker = {};
+				}
+				__paylocker.lang_interface = {
+					loading: '<?php _e('Загрузка', 'plugin-paylocker'); ?>'
+				};
+			</script>
+
 			<div class="wrap" id="onp-pl-begin-subscribe-page">
 				<div class="factory-bootstrap-000">
 					<h2>
-						<?php _e('Добавление покупок для пользователя', 'bizpanda') ?>
+						<?php _e('Добавление покупок для пользователя', 'plugin-paylocker') ?>
 					</h2>
 
 					<form method="POST" id="onp-pl-add-subscribe-form" class="form-horizontal" action="">
 						<?php if( isset($_GET['opanda_saved']) ) { ?>
 							<div id="message" class="alert alert-success">
-								<p><?php _e('Подписка успешно добавлена!', 'bizpanda') ?></p>
+								<p><?php _e('Подписка успешно добавлена!', 'plugin-paylocker') ?></p>
 							</div>
 						<?php } ?>
 
 						<?php if( isset($_GET['opanda_error_code']) ): ?>
 							<div id="message" class="alert alert-danger">
 								<p>
-									<?php _e('Возникла ошибка при сохранении данных!', 'bizpanda'); ?>
+									<?php _e('Возникла ошибка при сохранении данных!', 'plugin-paylocker'); ?>
 									<?php if( $_GET['opanda_error_code'] == 'locker_is_not_selected' ): ?>
-										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'bizpanda') ?>
+										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_table_name' ): ?>
-										<?php _e('Вы должны выбрать тарифную таблицу, чтобы создать покупку. Если она не создана, то создайте ее в настройках замка' . '.', 'bizpanda') ?>
+										<?php _e('Вы должны выбрать тарифную таблицу, чтобы создать покупку. Если она не создана, то создайте ее в настройках замка' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_selected_posts' ): ?>
-										<?php _e('Вы должны выбрать, хотя бы одну запись (страницу) для оформления покупки.', 'bizpanda') ?>
+										<?php _e('Вы должны выбрать, хотя бы одну запись (страницу) для оформления покупки.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'invalid_user_name' ): ?>
-										<?php _e('Вы должны заполнить поле "Имя пользователя".', 'bizpanda') ?>
+										<?php _e('Вы должны заполнить поле "Имя пользователя".', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'user_not_found' ): ?>
-										<?php _e('Пользователь с таким именем не найден.' . '.', 'bizpanda') ?>
+										<?php _e('Пользователь с таким именем не найден.' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 									<?php if( $_GET['opanda_error_code'] == 'save_error' ): ?>
-										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'bizpanda') ?>
+										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'plugin-paylocker') ?>
 									<?php endif; ?>
 								</p>
 							</div>
@@ -290,7 +301,7 @@
 							<label class="col-sm-2 control-label"> </label>
 
 							<div class="control-group controls col-sm-10">
-								<input id="onp-pl-add-subscribe-button" name="onp_pl_add_order" class="btn btn-primary" type="submit" value="<?php _e('Добавить покупку', 'bizpanda') ?>"/>
+								<input id="onp-pl-add-subscribe-button" name="onp_pl_add_order" class="btn btn-primary" type="submit" value="<?php _e('Добавить покупку', 'plugin-paylocker') ?>"/>
 							</div>
 						</div>
 					</form>
@@ -317,7 +328,7 @@
 				: null;
 
 			if( empty($lockerId) || empty($userId) || empty($postId) || empty($transactionId) ) {
-				wp_die(__('Ошибка! Не передан один из обязательных аргументов lockerId, userId, postId, transactionId.', 'bizpanda'));
+				wp_die(__('Ошибка! Не передан один из обязательных аргументов lockerId, userId, postId, transactionId.', 'plugin-paylocker'));
 				exit;
 			}
 
@@ -342,7 +353,7 @@
 		public function throwError($errorCode, $queryArgs = array(), $action = 'createOrder')
 		{
 			if( empty($errorCode) ) {
-				throw new Exception('Не передан обязательный атрибут errorCode');
+				throw new Exception(__('Не передан обязательный атрибут errorCode', 'plugin-paylocker'));
 			}
 			$this->redirectToAction($action, array_merge($queryArgs, array('opanda_error_code' => $errorCode)));
 			exit;

@@ -24,7 +24,7 @@
 
 			$this->id = "begin_subscribe";
 
-			$this->menuTitle = __('Оформить подписку', 'bizpanda');
+			$this->menuTitle = __('Оформить подписку', 'plugin-paylocker');
 
 			parent::__construct($plugin);
 		}
@@ -53,6 +53,7 @@
 			$this->styles->add(PAYLOCKER_URL . '/plugin/admin/assets/css/page.begin-subscribe.010000.css');
 
 			if( !isset($_GET['payment_proccess']) ) {
+				$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/load-tables-data.010000.js');
 				$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.begin-subscribe.010000.js');
 			}
 		}
@@ -64,8 +65,8 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'subscribe_locker',
-				'title' => __('Выберите подписку', 'bizpanda'),
-				'hint' => __('Выберите из списка нужную вам подписку.', 'bizpanda'),
+				'title' => __('Выберите подписку', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужную вам подписку.', 'plugin-paylocker'),
 				'cssClass' => isset($_GET['locker_id'])
 					? 'onp-pl-hide-control'
 					: '',
@@ -78,8 +79,8 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'table_name',
-				'title' => __('Выберите тариф', 'bizpanda'),
-				'hint' => __('Выберите из списка нужный вам тариф.', 'bizpanda'),
+				'title' => __('Выберите тариф', 'plugin-paylocker'),
+				'hint' => __('Выберите из списка нужный вам тариф.', 'plugin-paylocker'),
 				'data' => array()
 			);
 
@@ -90,11 +91,11 @@
 			$options[] = array(
 				'type' => 'dropdown',
 				'name' => 'paymentType',
-				'title' => __('Выберите способ оплаты', 'bizpanda'),
-				'hint' => __('Выберите способ оплаты подписки.', 'bizpanda'),
+				'title' => __('Выберите способ оплаты', 'plugin-paylocker'),
+				'hint' => __('Выберите способ оплаты подписки.', 'plugin-paylocker'),
 				'data' => array(
-					array('AC', 'Банковские карты'),
-					array('PC', 'Яндекс деньги')
+					array('AC', __('Банковские карты', 'plugin-paylocker')),
+					array('PC', __('Яндекс деньги', 'plugin-paylocker'))
 				)
 			);
 			$options[] = array(
@@ -105,7 +106,7 @@
 			$options[] = array(
 				'type' => 'hidden',
 				'name' => 'targets',
-				'value' => get_option('opanda_res_pl_payment_form_target_subscribe')
+				'value' => get_option('opanda_res_pl_payment_form_target_subscribe', __('Оплата премиум подписки {order_id}', 'plugin-paylocker'))
 			);
 			$options[] = array(
 				'type' => 'hidden',
@@ -150,6 +151,17 @@
 
 			$form->add($options);
 			?>
+
+			<script>
+				if( window.__paylocker === void 0 ) {
+					window.__paylocker = {};
+				}
+				__paylocker.lang_interface = {
+					loading: '<?php _e('Загрузка', 'plugin-paylocker'); ?>',
+					redirect: '<?php _e('Идет перенаправление...', 'plugin-paylocker'); ?>'
+				};
+			</script>
+
 			<div class="wrap" id="onp-pl-begin-subscribe-page">
 				<div class="factory-bootstrap-000">
 					<script>
@@ -157,7 +169,7 @@
 					</script>
 					<?php if( !isset($_GET['payment_proccess']) ): ?>
 						<h2>
-							<?php _e('Оформление премиум подписки', 'bizpanda') ?>
+							<?php _e('Оформление премиум подписки', 'plugin-paylocker') ?>
 						</h2>
 
 						<p><?php _e('На этой странице вы можете посмотреть список всех пользователей, которые имеют премиум подписку.'); ?></p>
@@ -165,13 +177,13 @@
 						<form method="POST" id="onp-pl-payment-form" class="form-horizontal" action="https://money.yandex.ru/quickpay/confirm.xml">
 							<?php if( isset($_GET['opanda_saved']) ) { ?>
 								<div id="message" class="alert alert-success">
-									<p><?php _e('Настройки успешно сохранены!', 'bizpanda') ?></p>
+									<p><?php _e('Настройки успешно сохранены!', 'plugin-paylocker') ?></p>
 								</div>
 							<?php } ?>
 
 							<?php if( isset($_GET['opanda_error_code']) && $_GET['opanda_error_code'] == 'sociallocker_is_not_selected' ) { ?>
 								<div id="message" class="alert alert-danger">
-									<p><?php _e('Возникла ошибка при сохранении данных! Вы должны выбрать (или создать) хотя бы один социальный замок, чтобы запустить процесс массовой блокировки.', 'bizpanda') ?></p>
+									<p><?php _e('Возникла ошибка при сохранении данных! Вы должны выбрать (или создать) хотя бы один социальный замок, чтобы запустить процесс массовой блокировки.', 'plugin-paylocker') ?></p>
 								</div>
 							<?php } ?>
 
@@ -182,7 +194,7 @@
 								<label class="col-sm-2 control-label"> </label>
 
 								<div class="control-group controls col-sm-10">
-									<input id="onp-pl-start-payment-button" class="btn btn-primary" type="submit" value="<?php _e('Оплатить подписку', 'bizpanda') ?>"/>
+									<input id="onp-pl-start-payment-button" class="btn btn-primary" type="submit" value="<?php _e('Оплатить подписку', 'plugin-paylocker') ?>"/>
 								</div>
 							</div>
 						</form>
@@ -219,20 +231,17 @@
 										});
 									})(jQuery);
 								</script>
-								<div class="onp-pl-flat-box onp-pl-loader">Пожалуйста, подождите! Идет обработка
-									платежа...
+								<div class="onp-pl-flat-box onp-pl-loader"><?php _e('Пожалуйста, подождите! Идет обработка
+									платежа...', 'plugin-paylocker') ?>
 								</div>
 							<?php elseif ($_GET['payment_proccess'] == 'success'): ?>
-								<div class="onp-pl-flat-box onp-pl-success">Спасибо, за оформление подписки. Ваш платеж
-									успешно
-									завершен!<br/><a href="<?= admin_url('admin.php?page=client_premium_subscribers-paylocker'); ?>">Перейти
-										в мои подписки</a>.
+								<div class="onp-pl-flat-box onp-pl-success"><?php _e('Спасибо, за оформление подписки. Ваш платеж
+									успешно	завершен!', 'plugin-paylocker') ?><br/>
+									<a href="<?= admin_url('admin.php?page=client_premium_subscribers-paylocker'); ?>"><?php _e('Перейти в мои подписки', 'plugin-paylocker') ?></a>.
 								</div>
 							<?php else: ?>
-								<div class="onp-pl-flat-box onp-pl-error">Ошибка! Возникала неизвестная ошибка во время
-									обработки платежа или платеж был отменен. В случае ошибки платежа, пожалуйста,
-									свяжитесь
-									с нашей службой поддержки.
+								<div class="onp-pl-flat-box onp-pl-error"><?php _e('Ошибка! Возникала неизвестная ошибка во время обработки платежа или платеж был отменен. В случае ошибки платежа, пожалуйста,
+									свяжитесь с нашей службой поддержки.', 'plugin-paylocker') ?>
 								</div>
 							<?php endif; ?>
 						</div>

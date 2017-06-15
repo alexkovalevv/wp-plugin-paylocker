@@ -51,7 +51,7 @@
 		{
 			parent::__construct($plugin);
 
-			$this->title = __('Настройка стиля для темы', 'bizpanda');
+			$this->title = __('Настройка стиля для темы', 'plugin-paylocker');
 		}
 
 		/**
@@ -140,25 +140,25 @@
 			$tabs['items'][] = array(
 				'type' => 'tab-item',
 				'name' => 'generals',
-				'title' => __('Основные', 'bizpanda'),
+				'title' => __('Основные', 'plugin-paylocker'),
 				'items' => array(
 					array(
 						'type' => 'color',
 						'name' => 'theme_bg_color',
 						'default' => '#75649b',
-						'title' => __('Цвет фона', 'bizpanda'),
-						'hint' => __('Выберите цвет фона контейнера замка.', 'bizpanda'),
+						'title' => __('Цвет фона', 'plugin-paylocker'),
+						'hint' => __('Выберите цвет фона контейнера замка.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_text_style',
-						'title' => __('Настройки текста', 'bizpanda'),
+						'title' => __('Настройки текста', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '15',
 							'color' => "#ffffff",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 				)
 			);
@@ -166,32 +166,32 @@
 			$tabs['items'][] = array(
 				'type' => 'tab-item',
 				'name' => 'theme_header',
-				'title' => __('Верх замка', 'bizpanda'),
+				'title' => __('Верх замка', 'plugin-paylocker'),
 				'items' => array(
 					array(
 						'type' => 'color',
 						'name' => 'theme_header_bg',
-						'title' => __('Цвет фона заголовка', 'bizpanda'),
+						'title' => __('Цвет фона заголовка', 'plugin-paylocker'),
 						'default' => '#3c2e4f',
-						'hint' => __('Выберите цвет фона заголовка замка.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона заголовка замка.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'color',
 						'name' => 'theme_header_border_color',
-						'title' => __('Цвет границы', 'bizpanda'),
+						'title' => __('Цвет границы', 'plugin-paylocker'),
 						'default' => '#d6bef7',
-						'hint' => __('Выберите цвет нижней границы заголовка.', 'bizpanda'),
+						'hint' => __('Выберите цвет нижней границы заголовка.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_header_text_style',
-						'title' => __('Настройки текста', 'bizpanda'),
+						'title' => __('Настройки текста', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '16',
 							'color' => "#d6bef7",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 				)
 			);
@@ -199,72 +199,72 @@
 			$tabs['items'][] = array(
 				'type' => 'tab-item',
 				'name' => 'theme_table_purchase',
-				'title' => __('Таблица покупки', 'bizpanda'),
+				'title' => __('Таблица покупки', 'plugin-paylocker'),
 				'items' => array(
 					array(
 						'type' => 'color',
 						'name' => 'theme_purchase_table_header_bg',
 						'default' => '#ffc107',
-						'title' => __('Цвет заголовка', 'bizpanda'),
-						'hint' => __('Выберите основной цвет таблицы.', 'bizpanda'),
+						'title' => __('Цвет заголовка', 'plugin-paylocker'),
+						'hint' => __('Выберите основной цвет таблицы.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'color',
 						'name' => 'theme_purchase_table_bg',
-						'title' => __('Цвет фона', 'bizpanda'),
+						'title' => __('Цвет фона', 'plugin-paylocker'),
 						'default' => '#fff',
-						'hint' => __('Выберите цвет фона таблицы.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона таблицы.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'color',
 						'name' => 'theme_purchase_table_button_bg',
-						'title' => __('Цвет кнопки', 'bizpanda'),
+						'title' => __('Цвет кнопки', 'plugin-paylocker'),
 						'default' => '#ffc107',
-						'hint' => __('Выберите цвет фона кнопки.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона кнопки.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_purchase_table_text_header',
-						'title' => __('Настройки текста "Заголовок"', 'bizpanda'),
+						'title' => __('Настройки текста "Заголовок"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '15',
 							'color' => "#222",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_purchase_table_text_price',
-						'title' => __('Настройки текста "Цена"', 'bizpanda'),
+						'title' => __('Настройки текста "Цена"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '25',
 							'color' => "#3c2e4f",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_purchase_table_text_description',
-						'title' => __('Настройки текста "Описание"', 'bizpanda'),
+						'title' => __('Настройки текста "Описание"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '13',
 							'color' => "#111",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_purchase_table_text_button',
-						'title' => __('Настройки текста кнопки', 'bizpanda'),
+						'title' => __('Настройки текста кнопки', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '11',
 							'color' => "#222",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 				)
 			);
@@ -272,97 +272,97 @@
 			$tabs['items'][] = array(
 				'type' => 'tab-item',
 				'name' => 'theme_table_subscribe',
-				'title' => __('Таблица подписки', 'bizpanda'),
+				'title' => __('Таблица подписки', 'plugin-paylocker'),
 				'items' => array(
 					array(
 						'type' => 'color',
 						'name' => 'theme_subscribe_table_header_bg',
 						'default' => '#d6bef7',
-						'title' => __('Цвет заголовка', 'bizpanda'),
-						'hint' => __('Выберите основной цвет таблицы.', 'bizpanda'),
+						'title' => __('Цвет заголовка', 'plugin-paylocker'),
+						'hint' => __('Выберите основной цвет таблицы.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'color',
 						'name' => 'theme_subscribe_table_bg',
-						'title' => __('Цвет фона', 'bizpanda'),
+						'title' => __('Цвет фона', 'plugin-paylocker'),
 						'default' => '#fff',
-						'hint' => __('Выберите цвет фона таблицы.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона таблицы.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'color',
 						'name' => 'theme_subscribe_button_bg',
-						'title' => __('Цвет кнопки', 'bizpanda'),
+						'title' => __('Цвет кнопки', 'plugin-paylocker'),
 						'default' => '#3c2e4f',
-						'hint' => __('Выберите цвет фона кнопки.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона кнопки.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_subscribe_table_text_header',
-						'title' => __('Настройки текста "Заголовок"', 'bizpanda'),
+						'title' => __('Настройки текста "Заголовок"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '23',
 							'color' => "#222",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_subscribe_table_text_price',
-						'title' => __('Настройки текста "Цена"', 'bizpanda'),
+						'title' => __('Настройки текста "Цена"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '25',
 							'color' => "#3c2e4f",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_subscribe_table_text_description',
-						'title' => __('Настройки текста "Описание"', 'bizpanda'),
+						'title' => __('Настройки текста "Описание"', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '13',
 							'color' => "#111",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_subscribe_table_text_button',
-						'title' => __('Настройки текста кнопки', 'bizpanda'),
+						'title' => __('Настройки текста кнопки', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '11',
 							'color' => "#222",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 				)
 			);
 			$tabs['items'][] = array(
 				'type' => 'tab-item',
 				'name' => 'theme_footer',
-				'title' => __('Низ замка', 'bizpanda'),
+				'title' => __('Низ замка', 'plugin-paylocker'),
 				'items' => array(
 					array(
 						'type' => 'color',
 						'name' => 'theme_footer_bg',
-						'title' => __('Цвет кнопки', 'bizpanda'),
+						'title' => __('Цвет кнопки', 'plugin-paylocker'),
 						'default' => '#3c2e4f',
-						'hint' => __('Выберите цвет фона кнопки.', 'bizpanda'),
+						'hint' => __('Выберите цвет фона кнопки.', 'plugin-paylocker'),
 					),
 					array(
 						'type' => 'font',
 						'name' => 'theme_footer_text',
-						'title' => __('Настройки текста кнопки', 'bizpanda'),
+						'title' => __('Настройки текста кнопки', 'plugin-paylocker'),
 						'default' => array(
 							'size' => '11',
 							'color' => "#222",
 							'family' => '"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif'
 						),
-						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'bizpanda'),
+						'hint' => __('Вы можете изменить размер текста, выбрать шрифт и цвет.', 'plugin-paylocker'),
 					),
 				)
 			);
