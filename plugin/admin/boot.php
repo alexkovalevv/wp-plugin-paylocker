@@ -12,28 +12,51 @@
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/begin-subscribe.php');
 	#endcomp
 
-	add_filter('manage_users_columns', 'pippin_add_user_id_column');
+	add_filter('manage_users_columns', 'onp_pl_add_user_id_column');
 
-	function pippin_add_user_id_column($columns)
+	function onp_pl_add_user_id_column($columns)
 	{
 		$columns['user_paylocker'] = __('Платный контент', 'plugin-paylocker');
 
 		return $columns;
 	}
 
-	add_action('manage_users_custom_column', 'pippin_show_user_id_column_content', 10, 3);
-
-	function pippin_show_user_id_column_content($value, $column_name, $user_id)
+	function onp_pl_show_user_id_column_content($value, $column_name, $user_id)
 	{
+		global $wpdb;
+
 		if( 'user_paylocker' == $column_name ) {
+
+			$results = $wpdb->get_results("
+				SELECT COUNT(*) as counts,table_payment_type as payment_type
+				FROM {$wpdb->prefix}opanda_pl_transactions
+				WHERE user_id='" . (int)$user_id . "' and transaction_status='finish'
+				GROUP BY table_payment_type
+			");
+
+			$countPurchase = 0;
+			$countSubscribes = 0;
+
+			if( !empty($results) ) {
+				foreach($results as $value) {
+					if( $value->payment_type == 'subscribe' ) {
+						$countSubscribes = $value->counts;
+					} else {
+						$countPurchase = $value->counts;
+					}
+				}
+			}
+
 			$purchasePageUrl = admin_url('edit.php?post_type=opanda-item&page=purchased_posts-paylocker&sort=user_id&user_id=' . $user_id);
 			$subscribePageUrl = admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-paylocker&sort=user_id&user_id=' . $user_id);
 
-			return '<a href="' . $purchasePageUrl . '" class="button button-default">' . __('Покупки', 'plugin-paylocker') . '</a> ' . ' <a href="' . $subscribePageUrl . '" class="button button-default">' . __('Подписки', 'plugin-paylocker') . '</a>';
+			return '<a href="' . $purchasePageUrl . '" class="button button-default">' . sprintf(__('Покупки (%d)', 'plugin-paylocker'), $countPurchase) . '</a> ' . ' <a href="' . $subscribePageUrl . '" class="button button-default">' . sprintf(__('Подписки (%d)', 'plugin-paylocker'), $countSubscribes) . '</a>';
 		}
 
 		return $value;
 	}
+
+	add_action('manage_users_custom_column', 'onp_pl_show_user_id_column_content', 10, 3);
 
 	/**
 	 * Добавляем скрипты paylocker в превью
@@ -426,3 +449,37 @@
 	}
 
 	add_action('admin_print_footer_scripts', 'opanda_quicktags_for_paylocker');
+
+	/**
+	 * Registers stats screens for Email Locker.
+	 *
+	 * @since 1.0.0
+	 */
+	function onp_pl_stats_screens($screens)
+	{
+		$screens = array(
+
+			// The Summary Screen
+
+			'summary' => array(
+				'title' => __('<i class="fa fa-search"></i> Общая', 'plugin-paylocker'),
+				'description' => __('Общая статистика по продажам и подпискам.', 'plugin-sociallocker'),
+				'chartClass' => 'OPanda_Paylocker_Summary_StatsChart',
+				'tableClass' => 'OPanda_Paylocker_Summary_StatsTable',
+				'path' => PAYLOCKER_DIR . '/plugin/admin/stats/summary.php'
+			),
+			// The Channels Screen
+
+			'earging' => array(
+				'title' => __('<i class="fa fa-search-plus"></i> Заработано', 'plugin-sociallocker'),
+				'description' => __('Сколько всего вы заработали на продаже контента.', 'plugin-sociallocker'),
+				'chartClass' => 'OPanda_Paylocker_Earning_StatsChart',
+				'tableClass' => 'OPanda_Paylocker_Earning_StatsTable',
+				'path' => PAYLOCKER_DIR . '/plugin/admin/stats/earning.php'
+			)
+		);
+
+		return $screens;
+	}
+
+	add_filter('bizpanda_pay-locker_stats_screens', 'onp_pl_stats_screens', 10, 1);

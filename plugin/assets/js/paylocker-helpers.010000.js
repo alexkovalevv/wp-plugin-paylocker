@@ -11,23 +11,12 @@
 	$.pandalocker.hooks.add('opanda-lock', function(e, locker) {
 		$(locker.locker).attr('id', locker.options.id);
 
-		if( $(locker.locker).hasClass('onp-sl-paylocker') && !$(locker.locker).find('.onp-pl-login-link-' + locker.options.lockerId).length ) {
+		if( $(locker.locker).hasClass('onp-sl-paylocker-mode') ) {
 			if( !__paylocker ) {
 				return;
 			}
-			$(locker.locker).append('<div style="text-align:right; background: #fdc6b5; padding:15px;">' +
-				'<a href="' + __paylocker.loginUrl + '" style="float:right;color:#505050; border:0;border-bottom:1px dashed #505050;" ' +
-				'class="onp-pl-login-link onp-pl-login-link-' + locker.options.lockerId + '">' +
-				'Уже подписаны? Тогда войдите' +
-				'</a>' +
-				'<a href="mailto:' + __paylocker.adminEmail + '" style="float:left;color:#505050; border:0;border-bottom:1px dashed #505050;">' +
-				'Остались вопросы? Пишите на ' + __paylocker.adminEmail +
-				'</a>' +
-				'<div style="clear: both;"></div>' +
-				'</div>'
-			);
 
-			$('.onp-pl-login-link').click(function() {
+			$(locker.locker).find('.onp-pl-login-link').click(function() {
 
 				var width = 550;
 				var height = 420;

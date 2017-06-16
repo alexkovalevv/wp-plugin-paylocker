@@ -157,7 +157,7 @@
 
 		// if the bizpanda has been already connected, inits the plugin manually
 		if( defined('OPANDA_ACTIVE') ) {
-			onp_sl_init_bizpanda(true);
+			onp_pl_init_bizpanda(true);
 		} else bizpanda_connect();
 
 		global $paylocker;

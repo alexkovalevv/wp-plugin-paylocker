@@ -90,6 +90,15 @@
 			global $post;
 
 			$tablesData = get_post_meta($post->ID, 'opanda_pricing_tables_data', true);
+
+			if( !is_array($tablesData) ) {
+				$tablesData = json_decode($tablesData);
+			}
+
+			if( empty($tablesData) ) {
+				$tablesData = array();
+			}
+
 			$tablesDataString = json_encode($tablesData, JSON_HEX_TAG);
 			$tablesDataString = htmlspecialchars($tablesDataString);
 			?>

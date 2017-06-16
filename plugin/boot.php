@@ -180,6 +180,9 @@
 
 		$options['paylocker']['ajaxUrl'] = admin_url('admin-ajax.php');
 		$options['paylocker']['helpUrl'] = opanda_get_item_option($lockerId, 'locker_help_url');
+		$options['paylocker']['supportUrl'] = 'mailto:' . get_bloginfo('admin_email');
+		$options['paylocker']['loginUrl'] = wp_login_url();
+
 		$options['paylocker']['paymentForms'] = array(
 			'yandex' => array(
 				'receiver' => opanda_get_option('pl_payment_form_receiver'),
