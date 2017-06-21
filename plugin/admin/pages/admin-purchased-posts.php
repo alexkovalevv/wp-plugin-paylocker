@@ -221,7 +221,7 @@
 					$this->throwError('save_error', $args);
 				}
 
-				require(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
+				require(PAYLOCKER_DIR . '/plugin/includes/classes/class.transactions.php');
 
 				foreach($selectedPosts as $postId) {
 					$transaction = OnpPl_Transactions::beginTransaction(array(

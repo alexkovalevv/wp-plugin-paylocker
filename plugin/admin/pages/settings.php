@@ -165,7 +165,7 @@
 
 		$options[] = array(
 			'type' => 'form-group',
-			'name' => 'paylocker-payment-form',
+			'name' => 'paylocker-yandex-payment-form',
 			'title' => __('Форма оплаты', 'bizpanda'),
 			'hint' => __('Текст расположенный на экране формы оплаты.', 'bizpanda'),
 			'items' => array(
@@ -204,4 +204,4 @@
 		return $options;
 	}
 
-	add_filter('bizpanda_settings_text_optons', 'onp_pl_settings_text_optons');
+	add_filter('bizpanda_settings_text_options', 'onp_pl_settings_text_optons');

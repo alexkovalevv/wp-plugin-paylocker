@@ -16,7 +16,7 @@
 		public function activate()
 		{
 			$this->createTables();
-			$this->setupLicense();
+			//$this->setupLicense();
 
 			// Add user role
 			add_role('pl_premium_subscriber', __('Премиум подписчик', 'plugin-paylocker'), array('read' => true));
@@ -39,6 +39,9 @@
 			if( !wp_next_scheduled('onp_pl_cron_tasks') ) {
 				wp_schedule_event(time(), 'hourly', 'onp_pl_cron_tasks');
 			}
+
+			add_option('opanda_pl_currency', 'USD');
+			add_option('opanda_pl_select_payment_gateway', 'paypal');
 		}
 
 		public function deactivate()

@@ -4,7 +4,7 @@
  * @copyright Alex Kovalev 25.12.2016 
  */
 
-#onp-pl-premium-subscribers-page, #onp-pl-purchased-posts-page {
+#onp-pl-premium-subscribers-page, #onp-pl-purchased-posts-page, #onp-pl-transactions-page {
   .wp-list-table {
     td {
       vertical-align: middle;
@@ -26,10 +26,20 @@
       margin-bottom: 4px;
     }
   }
-  .column-price {
+  .column-user_id {
+    padding: 15px 20px;
+  }
+  .column-user_name {
+    width: 150px;
+  }
+  .column-price, .column-user_id {
     width: 50px;
   }
-  .column-purchased_date {
+  .column-transaction_status {
+    width: 100px;
+
+  }
+  .column-purchased_date, .column-transaction_begin {
     width: 150px;
   }
   .column-actions {
@@ -39,7 +49,7 @@
     line-height: 2;
   }
   .onp-pl-expired-field {
-    width: 50px;
+    max-width: 50px;
   }
   .onp-pl-x25-button {
     margin-left: 3px;
@@ -63,5 +73,24 @@
   }
   .onp-pl-soon-expired-row {
     background-color: #fdf2e3;
+  }
+  .onp-pl-payment-status-dot {
+    position: relative;
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    top: 1px;
+    margin-right: 5px;
+    border: 2px solid;
+    &.onp-pl-waiting {
+      border-color: #9e9e9e;
+    }
+    &.onp-pl-finish {
+      border-color: #8bc34a;
+    }
+    &.onp-pl-cancel {
+      border-color: #ee1828;
+    }
   }
 }

@@ -4,15 +4,18 @@
  * @copyright Alex Kovalev 25.12.2016 
  */
 #onp-pl-premium-subscribers-page .wp-list-table td,
-#onp-pl-purchased-posts-page .wp-list-table td {
+#onp-pl-purchased-posts-page .wp-list-table td,
+#onp-pl-transactions-page .wp-list-table td {
   vertical-align: middle;
 }
 #onp-pl-premium-subscribers-page .column-avatar,
-#onp-pl-purchased-posts-page .column-avatar {
+#onp-pl-purchased-posts-page .column-avatar,
+#onp-pl-transactions-page .column-avatar {
   width: 50px;
 }
 #onp-pl-premium-subscribers-page .column-avatar .onp-pl-avatar,
-#onp-pl-purchased-posts-page .column-avatar .onp-pl-avatar {
+#onp-pl-purchased-posts-page .column-avatar .onp-pl-avatar,
+#onp-pl-transactions-page .column-avatar .onp-pl-avatar {
   display: block;
   width: 40px;
   height: 40px;
@@ -24,28 +27,55 @@
   background-size: 40px 40px;
   margin-bottom: 4px;
 }
+#onp-pl-premium-subscribers-page .column-user_id,
+#onp-pl-purchased-posts-page .column-user_id,
+#onp-pl-transactions-page .column-user_id {
+  padding: 15px 20px;
+}
+#onp-pl-premium-subscribers-page .column-user_name,
+#onp-pl-purchased-posts-page .column-user_name,
+#onp-pl-transactions-page .column-user_name {
+  width: 150px;
+}
 #onp-pl-premium-subscribers-page .column-price,
-#onp-pl-purchased-posts-page .column-price {
+#onp-pl-purchased-posts-page .column-price,
+#onp-pl-transactions-page .column-price,
+#onp-pl-premium-subscribers-page .column-user_id,
+#onp-pl-purchased-posts-page .column-user_id,
+#onp-pl-transactions-page .column-user_id {
   width: 50px;
 }
+#onp-pl-premium-subscribers-page .column-transaction_status,
+#onp-pl-purchased-posts-page .column-transaction_status,
+#onp-pl-transactions-page .column-transaction_status {
+  width: 100px;
+}
 #onp-pl-premium-subscribers-page .column-purchased_date,
-#onp-pl-purchased-posts-page .column-purchased_date {
+#onp-pl-purchased-posts-page .column-purchased_date,
+#onp-pl-transactions-page .column-purchased_date,
+#onp-pl-premium-subscribers-page .column-transaction_begin,
+#onp-pl-purchased-posts-page .column-transaction_begin,
+#onp-pl-transactions-page .column-transaction_begin {
   width: 150px;
 }
 #onp-pl-premium-subscribers-page .column-actions,
-#onp-pl-purchased-posts-page .column-actions {
+#onp-pl-purchased-posts-page .column-actions,
+#onp-pl-transactions-page .column-actions {
   width: 250px;
 }
 #onp-pl-premium-subscribers-page .column-expired_end,
-#onp-pl-purchased-posts-page .column-expired_end {
+#onp-pl-purchased-posts-page .column-expired_end,
+#onp-pl-transactions-page .column-expired_end {
   line-height: 2;
 }
 #onp-pl-premium-subscribers-page .onp-pl-expired-field,
-#onp-pl-purchased-posts-page .onp-pl-expired-field {
-  width: 50px;
+#onp-pl-purchased-posts-page .onp-pl-expired-field,
+#onp-pl-transactions-page .onp-pl-expired-field {
+  max-width: 50px;
 }
 #onp-pl-premium-subscribers-page .onp-pl-x25-button,
-#onp-pl-purchased-posts-page .onp-pl-x25-button {
+#onp-pl-purchased-posts-page .onp-pl-x25-button,
+#onp-pl-transactions-page .onp-pl-x25-button {
   margin-left: 3px;
   width: 25px;
   height: 25px;
@@ -54,22 +84,54 @@
   line-height: 1.8;
 }
 #onp-pl-premium-subscribers-page .onp-pl-offset-left-10,
-#onp-pl-purchased-posts-page .onp-pl-offset-left-10 {
+#onp-pl-purchased-posts-page .onp-pl-offset-left-10,
+#onp-pl-transactions-page .onp-pl-offset-left-10 {
   margin-left: 10px;
 }
 #onp-pl-premium-subscribers-page .onp-pl-field-success,
-#onp-pl-purchased-posts-page .onp-pl-field-success {
+#onp-pl-purchased-posts-page .onp-pl-field-success,
+#onp-pl-transactions-page .onp-pl-field-success {
   border-color: #8bc34a;
 }
 #onp-pl-premium-subscribers-page .onp-pl-field-error,
-#onp-pl-purchased-posts-page .onp-pl-field-error {
+#onp-pl-purchased-posts-page .onp-pl-field-error,
+#onp-pl-transactions-page .onp-pl-field-error {
   border-color: #ef7e70;
 }
 #onp-pl-premium-subscribers-page .onp-pl-already-expired-row,
-#onp-pl-purchased-posts-page .onp-pl-already-expired-row {
+#onp-pl-purchased-posts-page .onp-pl-already-expired-row,
+#onp-pl-transactions-page .onp-pl-already-expired-row {
   background-color: #ffefef;
 }
 #onp-pl-premium-subscribers-page .onp-pl-soon-expired-row,
-#onp-pl-purchased-posts-page .onp-pl-soon-expired-row {
+#onp-pl-purchased-posts-page .onp-pl-soon-expired-row,
+#onp-pl-transactions-page .onp-pl-soon-expired-row {
   background-color: #fdf2e3;
+}
+#onp-pl-premium-subscribers-page .onp-pl-payment-status-dot,
+#onp-pl-purchased-posts-page .onp-pl-payment-status-dot,
+#onp-pl-transactions-page .onp-pl-payment-status-dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  top: 1px;
+  margin-right: 5px;
+  border: 2px solid;
+}
+#onp-pl-premium-subscribers-page .onp-pl-payment-status-dot.onp-pl-waiting,
+#onp-pl-purchased-posts-page .onp-pl-payment-status-dot.onp-pl-waiting,
+#onp-pl-transactions-page .onp-pl-payment-status-dot.onp-pl-waiting {
+  border-color: #9e9e9e;
+}
+#onp-pl-premium-subscribers-page .onp-pl-payment-status-dot.onp-pl-finish,
+#onp-pl-purchased-posts-page .onp-pl-payment-status-dot.onp-pl-finish,
+#onp-pl-transactions-page .onp-pl-payment-status-dot.onp-pl-finish {
+  border-color: #8bc34a;
+}
+#onp-pl-premium-subscribers-page .onp-pl-payment-status-dot.onp-pl-cancel,
+#onp-pl-purchased-posts-page .onp-pl-payment-status-dot.onp-pl-cancel,
+#onp-pl-transactions-page .onp-pl-payment-status-dot.onp-pl-cancel {
+  border-color: #ee1828;
 }

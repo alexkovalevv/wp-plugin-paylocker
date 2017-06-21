@@ -6,10 +6,10 @@
 	 * @version 1.0
 	 */
 
-	add_action('wp_ajax_onp_pl_get_pricing_tables', 'onp_pl_get_pricing_tables');
-	add_action('wp_ajax_nopriv_onp_pl_get_pricing_tables', 'onp_pl_get_pricing_tables');
+	add_action('wp_ajax_onp_pl_get_pricing_tables', 'onp_pl_get_pricing_tables_action');
+	add_action('wp_ajax_nopriv_onp_pl_get_pricing_tables', 'onp_pl_get_pricing_tables_action');
 
-	function onp_pl_get_pricing_tables()
+	function onp_pl_get_pricing_tables_action()
 	{
 		$lockerId = isset($_POST['lockerId'])
 			? $_POST['lockerId']

@@ -16,8 +16,6 @@
 		{
 			global $wpdb;
 
-			$this->logging('[Тест крон]: ' . date('Y-m-d H:i:s') . "\n");
-
 			if( !get_option('opanda_notify_subscribe_expire', false) ) {
 				return;
 			}
@@ -100,7 +98,7 @@
 			$message = trim(get_option('opanda_subscribe_expire_email_body'));
 
 			if( empty($locker_id) || empty($subject) || empty($message) ) {
-				$this->logging(__('[Ошибка]: Уведомление не может быть отправлено, так как не установлен один или несколько атрибутов locker_id, subject, message', 'plugin-paylocker'));
+				onp_pl_logging('send-mail-errors', __('[Ошибка]: Уведомление не может быть отправлено, так как не установлен один или несколько атрибутов locker_id, subject, message', 'plugin-paylocker'));
 
 				return;
 			}
@@ -117,30 +115,11 @@
 		protected function mailerLog($mailer)
 		{
 			if( empty($mailer) || empty($mailer->errors) ) {
-				$this->logging(__('[Ошибка]: Неизвестная ошибка', 'plugin-paylocker'));
+				onp_pl_logging('send-mail-errors', __('[Ошибка]: Неизвестная ошибка', 'plugin-paylocker'));
 
 				return;
 			}
 
-			$logText = '';
-			foreach($mailer->errors as $errorCode => $errors) {
-				foreach($errors as $error) {
-					$logText .= $errorCode . "[" . $error . "]\n";
-				}
-			}
-
-			$this->logging($logText);
-		}
-
-		protected function logging($textErrors)
-		{
-			$filePath = PAYLOCKER_DIR . '/logs/send-mail-errors.log';
-
-			if( filesize($filePath) > 10000000 ) {
-				unlink($filePath);
-			}
-			$fileLog = fopen($filePath, 'a+');
-			fputs($fileLog, $textErrors . "\n\n");
-			fclose($fileLog);
+			onp_pl_logging('send-mail-errors', $mailer->errors);
 		}
 	}

@@ -12,12 +12,6 @@
 	// Constatns & Resources
 	//
 
-	#comp remove
-	//ini_set('display_errors', 1);
-	//ini_set('display_startup_errors', 1);
-	//error_reporting(E_ALL);
-	#endcomp
-
 	if( defined('PAYLOCKER_PLUGIN_ACTIVE') ) {
 		return;
 	}
@@ -132,7 +126,7 @@
 			array('bizpanda/libs/factory/bootstrap', 'factory_bootstrap_000', 'admin'),
 			array('bizpanda/libs/factory/notices', 'factory_notices_000', 'admin'),
 			array('bizpanda/libs/onepress/api', 'onp_api_000'),
-			array('bizpanda/libs/onepress/licensing', 'onp_licensing_000'),
+			//array('bizpanda/libs/onepress/licensing', 'onp_licensing_000'),
 			array('bizpanda/libs/onepress/updates', 'onp_updates_000')
 		));
 

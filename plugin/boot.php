@@ -1,8 +1,22 @@
 <?php
 
+	require_once(PAYLOCKER_DIR . '/plugin/includes/config.php');
 	require_once(PAYLOCKER_DIR . '/plugin/includes/functions.php');
 	require_once(PAYLOCKER_DIR . '/plugin/includes/shortcodes.php');
 	require_once(PAYLOCKER_DIR . '/plugin/includes/assets.php');
+
+	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
+	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
+
+	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.payment.abstract.php');
+
+	//new ADAD();
+
+	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
+	//$purchases = OnpPl_Purchase::getPurchases();
+	//$s = OnpPl_Purchase::getCount();
+
+	//$s = OnpPl_Purchase::getItems();
 
 	if( is_admin() ) {
 		require_once(PAYLOCKER_DIR . '/plugin/admin/boot.php');
@@ -17,8 +31,8 @@
 
 		// Выполняем задание для проверки истекших премиум подписок
 		require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
-		$subscribe = new OnpPl_Subcribe();
-		$subscribe->runSheduleCheckPremium();
+
+		OnpPl_Subcribe::runSheduleCheckPremium();
 	}
 
 	add_action('onp_pl_cron_tasks', 'onp_pl_cron_tasks_function');

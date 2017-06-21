@@ -44,10 +44,10 @@
 			$expiredTime = strtotime("+" . $expiredDays . " day");
 		}
 
-		require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
-		$premium = new OnpPl_PremiumSubscriber($userId);
+		require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.paylocker-user.php');
+		$paylocker_user = new OnpPl_PaylockerUser($userId);
 
-		if( !$premium->updateUserPremium($expiredTime, $lockerId) ) {
+		if( !$paylocker_user->updateSubscribe($expiredTime, $lockerId) ) {
 			echo json_encode(array(
 				'error' => __('Ошибка при обновлении данных пользователя.', 'bizpanda'),
 				'error_code' => 'save_error'

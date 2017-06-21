@@ -41,9 +41,9 @@
 		if( sha1($r['notification_type'] . '&' . $r['operation_id'] . '&' . $r['amount'] . '&' . $r['currency'] . '&' . $r['datetime'] . '&' . $r['sender'] . '&' . $r['codepro'] . '&' . $secret . '&' . $r['label']) != $r['sha1_hash'] ) {
 			//header("HTTP/1.0 500 Internal Server Error");
 
-			$file = fopen(PAYLOCKER_DIR . '/logs.txt', 'w+');
-			fputs($file, 'Верификация не пройдена. SHA1_HASH не совпадает.');
-			fclose($file);
+			onp_pl_logging('yandex-payments', __('Верификация не пройдена. SHA1_HASH не совпадает.', 'plugin-paylocker'));
+			onp_pl_logging('yandex-payments', $r);
+
 			exit('Верификация не пройдена. SHA1_HASH не совпадает.'); // останавливаем скрипт. у вас тут может быть свой код.
 		}
 
@@ -53,17 +53,18 @@
 		$r['withdraw_amount'] = floatval($r['withdraw_amount']);
 		$r['label'] = intval($r['label']);*/ // здесь я у себя передаю id юзера, который пополняет счет на моем сайте. поэтому обрабатываю его intval
 
-		$file = fopen(PAYLOCKER_DIR . '/logs.txt', 'w+');
-		fputs($file, 'Ammount: ' . $r['label']);
-		fclose($file);
-
 		require(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 		$transactionId = $r['label'];
-		OnpPl_Transactions::finishTransaction($transactionId);
 
-		//$transactionId = "b92086f8-44e3-4ef0-9d28-7437a18f89da";
-		// дальше ваш код для обновления баланса пользователя / для вставки полученного платежа в историю платежей, например:
-		//db_query('INSERT INTO payments (user_id, amount) VALUES('.$r['label'].', ',$r['amount']')'); // ваш запрос в базу
+		$transaction = OnpPl_Transaction::getInstance($transactionId);
+
+		if( !empty($transaction) ) {
+			try {
+				$transaction->finish();
+			} catch( Exception $e ) {
+				onp_pl_logging('yandex-payments', $e->getMessage());
+			}
+		}
 
 		exit;
 	}

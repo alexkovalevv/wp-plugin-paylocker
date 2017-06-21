@@ -15,7 +15,8 @@
 
 		public function get_views()
 		{
-			$counts = $this->getCountSegments();
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
+			$counts = OnpPl_Subcribe::getCountSubscribes();
 
 			$link = 'edit.php?post_type=' . OPANDA_POST_TYPE . '&page=admin_premium_subscribers-paylocker';
 
@@ -63,40 +64,6 @@
 			return $views;
 		}
 
-		public function getCountSegments()
-		{
-			global $wpdb;
-
-			$counts = array();
-
-			$result = $wpdb->get_results("
-			  SELECT COUNT(*) AS count,
-			  IF(expired_end > UNIX_TIMESTAMP(), 'active', 'expired')
-			  AS segment
-			  FROM wp_opanda_pl_subsribers GROUP BY segment", ARRAY_A);
-
-			foreach($result as $items) {
-				if( $items['segment'] == 'active' ) {
-					$counts['active'] = (int)$items['count'];
-				} else {
-					$counts['expired'] = (int)$items['count'];
-				}
-			}
-
-			$counts['all'] = array_sum($counts);
-
-			return $counts;
-		}
-
-		/*public function get_bulk_actions()
-		{
-			$actions = array(
-				'deactivate' => __('Сбросить премиум')
-			);
-
-			return $actions;
-		}*/
-
 		/**
 		 * Checks and runs the bulk action 'delete'.
 		 */
@@ -125,50 +92,44 @@
 		{
 			global $wpdb;
 
-			$query = "SELECT * FROM {$wpdb->prefix}opanda_pl_subsribers";
-
-			// where
-
-			$where = array();
+			$user_id = null;
 
 			if( !current_user_can('administrator') ) {
 				$current_user = wp_get_current_user();
-				$where[] = "user_id='" . $current_user->ID . "'";
+				$user_id = $current_user->ID;
 			} else if( isset($_GET['sort']) ) {
 				if( $_GET['sort'] === 'user_id' && isset($_GET['user_id']) ) {
-					$where[] = "user_id='" . (int)$_GET['user_id'] . "'";
+					$user_id = (int)$_GET['user_id'];
 				}
 			}
 
+			$segment = 'all';
+
 			if( isset($_GET['opanda_status']) && $_GET['opanda_status'] == 'active' ) {
-				$where[] = 'expired_end > ' . time();
+				$segment = 'active';
 			}
 
 			if( isset($_GET['opanda_status']) && $_GET['opanda_status'] == 'expired' ) {
-				$where[] = 'expired_end < ' . time();
+				$segment = 'expired';
 			}
 
 			if( isset($_GET['s']) ) {
 
-				$search = trim(addcslashes(esc_sql($_GET['s']), '%_'));
+				$search = rtrim(trim(addcslashes(esc_sql($_GET['s']), '%_')));
 
-				$results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}users WHERE user_login LIKE '%" . $search . "%'", ARRAY_A);
+				$result = $wpdb->get_var("SELECT ID FROM {$wpdb->prefix}users WHERE user_login='" . $search . "'");
+				if( !empty($result) ) {
+					$user_id = $result;
+				} else {
+					$this->items = array();
 
-				$usersIdStr = '';
-				foreach($results as $result) {
-					$usersIdStr .= "'" . $result['ID'] . "',";
+					return;
 				}
-				$usersIdStr = rtrim($usersIdStr, ',');
-				$where[] = "user_id in (" . $usersIdStr . ")";
 			}
 
-			if( !empty($where) ) {
-				$query .= ' WHERE ' . implode(' AND ', $where);
-			}
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
+			$totalitems = OnpPl_Subcribe::getCountSubscribes($user_id, $segment);
 
-			$query .= ' ORDER BY expired_begin DESC';
-
-			$totalitems = $wpdb->query($query);
 			$perpage = 20;
 
 			$paged = !empty($_GET["paged"])
@@ -179,9 +140,10 @@
 			}
 			$totalpages = ceil($totalitems / $perpage);
 
+			$offset = null;
+
 			if( !empty($paged) && !empty($perpage) ) {
 				$offset = ($paged - 1) * $perpage;
-				$query .= ' LIMIT ' . (int)$offset . ',' . (int)$perpage;
 			}
 
 			$this->set_pagination_args(array(
@@ -190,7 +152,9 @@
 				"per_page" => $perpage,
 			));
 
-			$this->items = $wpdb->get_results($query);
+			$this->items = OnpPl_Subcribe::getSubscribes(array(
+				'user_id' => $user_id
+			), $segment, array('expired_begin' => 'DESC'), $perpage, $offset);
 		}
 
 		public function no_items()
@@ -255,6 +219,7 @@
 				//$columns['cb'] = '<input type="checkbox" />';
 				$columns['avatar'] = '';
 				$columns['user_name'] = __('Имя пользователя', 'plugin-paylocker');
+				$columns['prolongations'] = __('Статистика', 'plugin-paylocker');
 			}
 
 			$columns['locker_title'] = __('Название подписки', 'plugin-paylocker');
@@ -268,6 +233,10 @@
 			} else {
 				$columns['actions'] = __('Действия', 'plugin-paylocker');
 			}
+
+			/*if( current_user_can('administrator') ) {
+
+			}*/
 
 			return $columns;
 		}
@@ -327,15 +296,21 @@
 		 */
 		public function column_user_name($record)
 		{
-			$userdata = WP_User::get_data_by('ID', $record->user_id);
-
-			$displayName = !empty($userdata->display_name)
-				? $userdata->display_name
-				: $userdata->user_login;
-
 			$userProfileUrl = get_edit_user_link($record->user_id);
+			$paylocker_user = $record->getUser();
 
-			echo sprintf(__('<a href="%s">%s</a>'), $userProfileUrl, $displayName);
+			echo sprintf(__('<a href="%s">%s</a>'), $userProfileUrl, $paylocker_user->display_name);
+		}
+
+		public function column_prolongations($record)
+		{
+			$paylocker_user = $record->getUser();
+			$spending = $paylocker_user->getTotalSpendingBySubscribe($record->locker_id);
+
+			$currency_code = get_option('opanda_pl_currency', 'USD');
+			$spending = $spending . onp_pl_get_currency_symbol($currency_code);
+
+			echo 'Подписка продлена: ' . $paylocker_user->getProlangationCounts($record->locker_id) . ' <br>Всего потрачено: ' . $spending;
 		}
 
 		/**
@@ -355,7 +330,22 @@
 				$output = '<a href="' . $postUrl . '"><strong>' . $postTitle . '</strong></a>';
 			}
 
-			echo $output;
+			$last_transaction_title = '';
+
+			$paylocker_user = $record->getUser();
+			$transaction = $paylocker_user->getLastSubscribe();
+
+			if( !empty($transaction) ) {
+				$pricing_table = onp_pl_get_pricing_table($record->locker_id, $transaction->table_name);
+
+				if( !empty($pricing_table) ) {
+					$last_transaction_title .= '<b>' . __('Последний использованный тариф') . ':</b><br>';
+					$last_transaction_title .= '<i style="color: #999">+' . $pricing_table['expired'] . ' ' . __('дней', 'plugin-paylocker');
+					$last_transaction_title .= ' (' . $pricing_table['header'] . ')</i>';
+				}
+			}
+
+			echo $output . '<br>' . $last_transaction_title;
 		}
 
 		/**
@@ -374,24 +364,23 @@
 		public function column_expired_end($record)
 		{
 			$subscribeTime = $this->convertTimetoDays($record->expired_end);
+			$expiredEndDate = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->expired_end + (get_option('gmt_offset') * 3600));
 
 			if( current_user_can('administrator') ) {
+				$paylocker_user = $record->getUser();
 
-				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.premium-subscriber.php');
-				$premiumSubscriber = new OnpPl_PremiumSubscriber($record->user_id);
-
-				if( $premiumSubscriber->hasUserPremium($record->locker_id) ) {
+				if( $paylocker_user->hasCaps($record->locker_id) ) {
 					echo '<input type="text" data-user-id="' . $record->user_id . '" data-locker-id="' . $record->locker_id . '" data-default-expired="' . $subscribeTime . '" class="onp-pl-expired-field" value="' . $subscribeTime . '">';
 					echo '<a href="#" class="button button-default onp-pl-offset-left-10 onp-pl-x25-button onp-pl-plus-button">+</button>';
 					echo '<a href="#" class="button button-default onp-pl-x25-button onp-pl-minus-button">-</button>';
 				} else {
-					echo '<span style="color:red;">' . __('подписка истекла', 'plugin-paylocker');
+					echo '<span class="onp-pl-payment-status-dot onp-pl-cancel" title="' . sprintf(__('подписка истекла %s', 'plugin-paylocker'), $expiredEndDate) . '"></span>' . __('подписка истекла', 'plugin-paylocker');
 				}
 			} else {
 				if( $subscribeTime ) {
 					echo sprintf(__('через %d дней', 'plugin-paylocker'), $subscribeTime);
 				} else {
-					echo '<span style="color:red;">' . __('подписка истекла', 'plugin-paylocker');
+					echo '<span class="onp-pl-payment-status-dot onp-pl-cancel" title="' . sprintf(__('подписка истекла %s', 'plugin-paylocker'), $expiredEndDate) . '"></span>' . __('подписка истекла', 'plugin-paylocker');
 				}
 			}
 		}

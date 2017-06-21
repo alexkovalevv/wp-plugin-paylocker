@@ -3,8 +3,9 @@
 	require PAYLOCKER_DIR . '/plugin/admin/pages/settings.php';
 	require PAYLOCKER_DIR . '/plugin/admin/metaboxes/basic-options.php';
 	require(PAYLOCKER_DIR . '/plugin/admin/activation.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/license-manager.php');
+	//require(PAYLOCKER_DIR . '/plugin/admin/pages/license-manager.php');
 	//require(SOCIALLOCKER_DIR . '/plugin/admin/notices.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-transactions-list.php');
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-premium-subscribe-list.php');
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/client-premium-subscribe-list.php');
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-purchased-posts.php');
@@ -12,8 +13,110 @@
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/begin-subscribe.php');
 	#endcomp
 
-	add_filter('manage_users_columns', 'onp_pl_add_user_id_column');
+	/**
+	 * Регистрируем секцию документации плагина
+	 * @param $pages
+	 * @return mixed
+	 */
+	function onp_pl_register_help($pages)
+	{
+		global $opanda_help_cats;
+		if( !$opanda_help_cats ) {
+			$opanda_help_cats = array();
+		}
 
+		if( BizPanda::isSinglePlugin() ) {
+			$pages = array();
+		}
+
+		$items = array(
+			array(
+				'name' => 'paylocker-quick-start',
+				'title' => __('Быстрый старт', 'plugin-paylocker')
+			),
+			array(
+				'name' => 'paylocker-usage-setting',
+				'title' => __('Настройка плагина', 'plugin-paylocker'),
+				'hollow' => true,
+				'items' => array(
+					array(
+						'name' => 'paylocker-usage-setting',
+						'title' => __('Основные настройки', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-yandex',
+						'title' => __('Настройка яндекс денег', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-paypal',
+						'title' => __('Настройка paypal', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-paypal',
+						'title' => __('Настройка блокировки', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-paypal',
+						'title' => __('Настройка уведомлений', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-paypal',
+						'title' => __('Настройка доступа', 'plugin-paylocker')
+					),
+					array(
+						'name' => 'paylocker-usage-setting-paypal',
+						'title' => __('Настройка статистики', 'plugin-paylocker')
+					)
+				)
+			)
+		);
+
+		$items = apply_filters('onp_sl_register_help_pages', $items);
+
+		array_unshift($pages, array(
+			'name' => 'paylocker',
+			'title' => __('Плагин: Платный контент', 'plugin-paylocker'),
+			'items' => $items
+		));
+
+		return $pages;
+	}
+
+	add_filter('bizpanda_help_pages', 'onp_pl_register_help');
+
+	/**
+	 * Страница справки: обзор плагина paylocker
+	 *
+	 * @since 1.0.0
+	 * @param FactoryPages000_AdminPage $manager
+	 * @return void
+	 */
+	function onp_pl_help_page_paylocker($manager)
+	{
+		require PAYLOCKER_DIR . '/plugin/admin/pages/help/paylocker.php';
+	}
+
+	add_action('bizpanda_help_page_paylocker', 'onp_pl_help_page_paylocker');
+
+	/**
+	 * Страница справки: быстрый старт
+	 *
+	 * @since 1.0.0
+	 * @param FactoryPages000_AdminPage $manager
+	 * @return void
+	 */
+	function onp_pl_help_page_paylocker_quick_start($manager)
+	{
+		require PAYLOCKER_DIR . '/plugin/admin/pages/help/quick-start.php';
+	}
+
+	add_action('bizpanda_help_page_paylocker-quick-start', 'onp_pl_help_page_paylocker_quick_start');
+
+	/**
+	 * Хук добавляет колонку в талицу пользователей Wordpress
+	 * @param array $columns
+	 * @return array
+	 */
 	function onp_pl_add_user_id_column($columns)
 	{
 		$columns['user_paylocker'] = __('Платный контент', 'plugin-paylocker');
@@ -21,6 +124,16 @@
 		return $columns;
 	}
 
+	add_filter('manage_users_columns', 'onp_pl_add_user_id_column');
+
+	/**
+	 * Добавляет содержание колонки в таблице пользователей.
+	 * Кнопки на корзинки приобритенных продуктов.
+	 * @param string $value
+	 * @param string $column_name
+	 * @param int $user_id
+	 * @return string
+	 */
 	function onp_pl_show_user_id_column_content($value, $column_name, $user_id)
 	{
 		global $wpdb;
@@ -120,7 +233,7 @@
 		if( isset($submenu['edit.php?post_type=' . OPANDA_POST_TYPE]) ) {
 			$bizpandaMenu = $submenu['edit.php?post_type=' . OPANDA_POST_TYPE];
 			foreach($bizpandaMenu as $menuKey => $menuValue) {
-				if( $menuValue[2] === 'admin_premium_subscribers-' . $paylocker->pluginName || $menuValue[2] === 'purchased_posts-' . $paylocker->pluginName ) {
+				if( $menuValue[2] === 'admin_premium_subscribers-' . $paylocker->pluginName || $menuValue[2] === 'purchased_posts-' . $paylocker->pluginName || $menuValue[2] === 'transactions-' . $paylocker->pluginName ) {
 					$detachMenuItems[] = $bizpandaMenu[$menuKey];
 					unset($bizpandaMenu[$menuKey]);
 				}

@@ -5,11 +5,11 @@
 		public function __construct($options = array())
 		{
 			if( current_user_can('administrator') ) {
-				$options['singular'] = __('Список покупок пользователей', 'bizpanda');
-				$options['plural'] = __('Список покупок пользователей', 'bizpanda');
+				$options['singular'] = __('Список покупок пользователей', 'plugin-paylocker');
+				$options['plural'] = __('Список покупок пользователей', 'plugin-paylocker');
 			} else {
-				$options['singular'] = __('Мои покупки', 'bizpanda');
-				$options['plural'] = __('Мои покупки', 'bizpanda');
+				$options['singular'] = __('Мои покупки', 'plugin-paylocker');
+				$options['plural'] = __('Мои покупки', 'plugin-paylocker');
 			}
 
 			$options['ajax'] = false;
@@ -22,9 +22,9 @@
 		public function no_items()
 		{
 			if( current_user_can('administrator') ) {
-				echo __('На вашем сайте еще не производились покупки.', 'bizpanda');
+				echo __('На вашем сайте еще не производились покупки.', 'plugin-paylocker');
 			} else {
-				echo __('Вы не приобрели еще ни одной статьи.', 'bizpanda');
+				echo __('Вы не приобрели еще ни одной статьи.', 'plugin-paylocker');
 			}
 		}
 
@@ -37,15 +37,15 @@
 
 			$columns = array(
 				'avatar' => '',
-				'price' => __('Цена', 'bizpanda'),
-				'post_title' => __('Заголовок записи', 'bizpanda'),
-				'purchased_date' => __('Приобретен', 'bizpanda')
+				'price' => __('Цена', 'plugin-paylocker'),
+				'post_title' => __('Заголовок записи', 'plugin-paylocker'),
+				'purchased_date' => __('Приобретен', 'plugin-paylocker')
 			);
 
 			if( current_user_can('administrator') ) {
-				$columns['user_name'] = __('Имя пользователя', 'bizpanda');
-				$columns['locker_title'] = __('Заголовок замка', 'bizpanda');
-				$columns['actions'] = __('Действия', 'bizpanda');
+				$columns['user_name'] = __('Имя пользователя', 'plugin-paylocker');
+				$columns['locker_title'] = __('Заголовок замка', 'plugin-paylocker');
+				$columns['actions'] = __('Действия', 'plugin-paylocker');
 				$columns = array('cb' => '<input type="checkbox" />') + $columns;
 			}
 
@@ -218,7 +218,8 @@
 		 */
 		public function column_price($record)
 		{
-			echo $record->price . ' руб.';
+			$currency_code = get_option('opanda_pl_currency', 'USD');
+			echo $record->price . onp_pl_get_currency_symbol($currency_code);
 		}
 
 		/**
@@ -253,7 +254,7 @@
 		public function column_actions($record)
 		{
 			global $paylocker;
-			echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName) . '&action=delete&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '&post_id=' . $record->post_id . '&transaction_id=' . $record->transaction_id . '" class="button button-default">' . __('Удалить', 'bizpanda') . '</a>';
+			echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName) . '&action=delete&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '&post_id=' . $record->post_id . '&transaction_id=' . $record->transaction_id . '" class="button button-default">' . __('Удалить', 'plugin-paylocker') . '</a>';
 		}
 	}
 	/*@mix:place*/

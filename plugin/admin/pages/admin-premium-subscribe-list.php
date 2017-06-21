@@ -22,10 +22,8 @@
 
 			$this->id = "admin_premium_subscribers";
 
-			$count = $this->getCount();
-			if( empty($count) ) {
-				$count = '0';
-			}
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
+			$count = OnpPl_Subcribe::getCountSubscribes(null, 'all');
 
 			$this->menuTitle = sprintf(__('Подписки (%d)', 'plugin-paylocker'), $count);
 
@@ -56,28 +54,6 @@
 			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/load-tables-data.010000.js');
 			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/create-subscribe.010000.js');
 			$this->scripts->add(PAYLOCKER_URL . '/plugin/admin/assets/js/page.admin-premium-subscribers.010000.js');
-		}
-
-		public function getCount($cache = true)
-		{
-			global $wpdb;
-
-			$count = null;
-
-			if( $cache ) {
-				$count = get_transient('onp_pl_subsribers_count');
-				if( $count === '0' || !empty($count) ) {
-					return intval($count);
-				}
-			}
-
-			$count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}opanda_pl_subsribers");
-
-			if( !empty($count) ) {
-				set_transient('onp_pl_subsribers_count', $count, 60 * 5);
-			}
-
-			return $count;
 		}
 
 		public function indexAction()
@@ -304,7 +280,8 @@
 
 				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 
-				$transaction = OnpPl_Transactions::beginTransaction(array(
+				$transaction = new OnpPl_Transaction();
+				$transaction_id = $transaction->create(array(
 					'user_id' => $current_user->ID,
 					'locker_id' => $lockerId,
 					'post_id' => 0,
@@ -313,16 +290,17 @@
 					'table_price' => $table['price'],
 				));
 
-				if( empty($transaction) ) {
+				if( empty($transaction_id) ) {
 					wp_redirect($url . '&opanda_error_code=transaction_id_not_created');
 					exit;
 				}
 
 				try {
-					OnpPl_Transactions::finishTransaction($transaction['transaction_id']);
+					$transaction->finish();
 					wp_redirect(admin_url('edit.php?post_type=opanda-item&page=admin_premium_subscribers-' . $paylocker->pluginName));
 					exit;
 				} catch( Exception $e ) {
+					onp_pl_logging('admin-pages', $e->getMessage());
 					wp_redirect($url . '&opanda_error_code=save_error');
 					exit;
 				}

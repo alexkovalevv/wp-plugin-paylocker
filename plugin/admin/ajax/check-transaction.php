@@ -11,27 +11,34 @@
 
 	function onp_pl_check_transaction()
 	{
-		$transactionId = isset($_POST['transactionId'])
+		$transaction_id = isset($_POST['transactionId'])
 			? $_POST['transactionId']
 			: null;
 
-		if( empty($transactionId) ) {
-			echo json_encode(array('error' => 'Не передан Id транзации', 'error_code' => 'invalid_transaction_id'));
+		if( empty($transaction_id) ) {
+			$error = json_encode(array(
+				'error' => __('Не передан Id транзации', 'plugin-paylocker'),
+				'error_code' => 'invalid_transaction_id'
+			));
+			onp_pl_logging('ajax-errors', $error);
+			echo $error;
 			exit;
 		}
 
 		require_once PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php';
 
-		$transaction = OnpPl_Transactions::getTransaction($transactionId);
+		$transaction = OnpPl_Transaction::getInstance($transaction_id);
 
 		if( empty($transaction) ) {
-			echo json_encode(array(
-				'error' => 'Транзация не существует или устарела.',
+			$error = json_encode(array(
+				'error' => __('Транзация не существует или устарела.', 'plugin-paylocker'),
 				'error_code' => 'transaction_not_found'
 			));
+			onp_pl_logging('ajax-errors', $error);
+			echo $error;
 			exit;
 		}
 
-		echo json_encode(array('transaction_status' => $transaction['transaction_status']));
+		echo json_encode(array('transaction_status' => $transaction->transaction_status));
 		exit;
 	}
