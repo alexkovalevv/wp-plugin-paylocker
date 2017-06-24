@@ -23,7 +23,7 @@
 			$this->id = "admin_premium_subscribers";
 
 			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
-			$count = OnpPl_Subcribe::getCountSubscribes(null, 'all');
+			$count = OnpPl_Subcribe::getCounts(null, 'all');
 
 			$this->menuTitle = sprintf(__('Подписки (%d)', 'plugin-paylocker'), $count);
 
@@ -64,7 +64,7 @@
 				require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 			}
 
-			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.premium-subscribers.table.php');
+			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.subscribes.table.php');
 
 			$table = new OnpPl_PremiumSubsribersTable(array('screen' => 'onp-pl-premium-subscribers'));
 			$table->prepare_items();
@@ -280,8 +280,7 @@
 
 				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 
-				$transaction = new OnpPl_Transaction();
-				$transaction_id = $transaction->create(array(
+				$transaction = new OnpPl_Transaction(array(
 					'user_id' => $current_user->ID,
 					'locker_id' => $lockerId,
 					'post_id' => 0,
@@ -289,6 +288,8 @@
 					'table_name' => $tableName,
 					'table_price' => $table['price'],
 				));
+				
+				$transaction_id = $transaction->create();
 
 				if( empty($transaction_id) ) {
 					wp_redirect($url . '&opanda_error_code=transaction_id_not_created');

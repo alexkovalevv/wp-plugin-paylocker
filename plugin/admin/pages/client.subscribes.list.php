@@ -41,7 +41,7 @@
 				require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 			}
 
-			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.premium-subscribers.table.php');
+			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.subscribes.table.php');
 
 			$table = new OnpPl_PremiumSubsribersTable(array('screen' => 'onp-pl-premium-subscribers'));
 			$table->prepare_items();

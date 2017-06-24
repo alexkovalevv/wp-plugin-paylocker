@@ -22,21 +22,19 @@
 		public function __construct($data = null)
 		{
 			if( empty($data) ) {
-				return;
+				return false;
 			}
 
 			$this->setInstance($data);
 		}
 
 		/**
-		 * Заполняет атрибуты класса
+		 * Заполняет атрибуты классаs
 		 * @param object $data
 		 */
 		protected function setInstance($data)
 		{
-			if( is_object($data) ) {
-				$data = get_object_vars($data);
-			}
+			$data = wp_parse_args($data);
 
 			if( !is_array($data) ) {
 				throw new Exception(__('Атрибут data должен быть объектом или массивом.', 'plugin-paylocker'));
@@ -56,42 +54,21 @@
 			return static::$cache_prefix . static::$cache_group;
 		}
 
-		/**
-		 * Получает и возвращает экземляр дочернего класса,
-		 * в котором был вызван этот метод.
-		 * @param int $item_id
-		 * @param int $item_id2
-		 * @param $args
-		 * @return bool|mixed
-		 */
-		public static function getInstance($args)
+		public static function instanceQuery($sql)
 		{
 			global $wpdb;
-			$item_id = $item_id2 = null;
 
-			if( is_array($args) || is_object($args) ) {
-				$args = wp_parse_args($args);
-				$item_id = $args[0];
-				$item_id2 = $args[1];
-			} else {
-				$item_id = $args;
-			}
-
-			if( empty($item_id) ) {
+			if( empty($sql) ) {
 				return false;
 			}
 
-			$cache_key = $item_id;
-
-			if( !empty($item_id2) ) {
-				$cache_key .= '-' . $item_id2;
-			}
+			$cache_key = md5($sql);
 
 			$data = wp_cache_get($cache_key, self::getCacheGroupName());
 
 			if( !$data ) {
 
-				$data = $wpdb->get_row($wpdb->prepare(static::getInstanceSql(), $item_id, $item_id2));
+				$data = $wpdb->get_row($sql);
 
 				if( empty($data) ) {
 					return false;
@@ -100,7 +77,7 @@
 				wp_cache_add($cache_key, $data, self::getCacheGroupName());
 			}
 
-			return static::fromClass($data);
+			return $data;
 		}
 
 		/**
@@ -197,14 +174,22 @@
 
 				foreach($args as $key => $value) {
 
-					if( in_array($key, $allow_args) ) {
-						$value = (int)$value;
-					} else {
-						$value = sanitize_text_field($value);
-					}
+					if( is_array($value) && !empty($value) ) {
+						if( sizeof($value) !== 2 || !is_string($value[0]) || !is_string($value[1]) ) {
+							throw new Exception(__('Невозможно разобрать массив данных', 'plugin-paylocker'));
+						}
 
-					if( !empty($value) ) {
-						$where[] = $key . "='" . $value . "'";
+						$where[] = $key . " " . $value[0] . " " . $value[1];
+					} else {
+						if( in_array($key, $allow_args) ) {
+							$value = (int)$value;
+						} else {
+							$value = sanitize_text_field($value);
+						}
+
+						if( !empty($value) ) {
+							$where[] = $key . "='" . $value . "'";
+						}
 					}
 				}
 			}
@@ -244,15 +229,6 @@
 			}
 
 			return $transactions;
-		}
-
-		/**
-		 * Возвращает sql запрос для получения покупки
-		 * @return string
-		 */
-		protected static function getInstanceSql()
-		{
-			return null;
 		}
 
 		/**

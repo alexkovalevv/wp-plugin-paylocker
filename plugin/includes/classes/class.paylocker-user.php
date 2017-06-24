@@ -109,9 +109,10 @@
 		{
 			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
 
-			return OnpPl_Transaction::getTransactions(array(
+			return OnpPl_Transaction::getItems(array(
 				'user_id' => $this->ID,
 				'locker_id' => $locker_id,
+				'table_payment_type' => 'subscribe',
 				'transaction_status' => $status
 			));
 		}
@@ -191,7 +192,7 @@
 		public function getSubscribes()
 		{
 			if( !empty($this->subscribes) ) {
-				$this->subscribes = OnpPl_Subcribe::getSubscribes(array('user_id' => $this->ID));
+				$this->subscribes = OnpPl_Subcribe::getItems(array('user_id' => $this->ID));
 			}
 
 			return $this->subscribes;

@@ -1,6 +1,6 @@
 <?php
 
-	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.offers.abstract.php');
+	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.offers.php');
 
 	/**
 	 * Класс отвечает за работу с транзакциями
@@ -67,9 +67,10 @@
 		}
 
 		/**
-		 * Возвращает экземпляр транзацкции
-		 * @param $transaction_id
-		 * @return OnpPl_Transaction|bool
+		 * Возвращает экземпляр текущего класса
+		 * @param int $user_id
+		 * @param int $post_id
+		 * @return bool|OnpPl_Purchase
 		 */
 		public static function getInstance($transaction_id)
 		{
@@ -79,34 +80,17 @@
 				return false;
 			}
 
-			$transaction = wp_cache_get($transaction_id, 'paylocker_transaction');
-
-			if( !$transaction ) {
-				$transaction = $wpdb->get_row($wpdb->prepare("
+			$item_data = self::instanceQuery($wpdb->prepare("
 	                SELECT *
-	                FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_TRANSACTIONS . "
+	                FROM " . $wpdb->prefix . self::$db_table_name . "
 	                WHERE transaction_id = '%s'
 	            ", $transaction_id));
 
-				if( empty($transaction) ) {
-					return false;
-				}
-
-				wp_cache_add($transaction->transaction_id, $transaction, 'paylocker_transaction');
+			if( empty($item_data) ) {
+				return false;
 			}
 
-			return new OnpPl_Transaction($transaction);
-		}
-
-		/**
-		 * Возвращает sql запрос для получения покупки
-		 * @return string
-		 */
-		protected static function getInstanceSql()
-		{
-			global $wpdb;
-
-			return "SELECT * FROM " . $wpdb->prefix . self::$db_table_name . " WHERE transaction_id = '%s'";
+			return new OnpPl_Transaction($item_data);
 		}
 
 		/**
@@ -127,53 +111,26 @@
 		 * @param array $args
 		 * @return bool
 		 */
-		public function create(array $args)
+		public function create()
 		{
 			global $wpdb;
 
-			if( empty($args) ) {
-				return false;
-			}
-
-			$defaults = array(
-				'transaction_id' => $this->generateGuid(),
-				'user_id' => null,
-				'locker_id' => null,
-				'post_id' => null,
-				'table_payment_type' => null,
-				'table_name' => null,
-				'table_price' => 0,
-				'transaction_status' => 'waiting',
+			$data = array(
+				'transaction_id' => !empty($this->ID)
+					? $this->ID
+					: $this->generateGuid(),
+				'user_id' => $this->user_id,
+				'locker_id' => $this->locker_id,
+				'post_id' => $this->post_id,
+				'table_payment_type' => $this->table_payment_type,
+				'table_name' => $this->table_name,
+				'table_price' => $this->table_price,
+				'transaction_status' => !empty($this->transaction_status)
+					? $this->transaction_status
+					: 'waiting',
 				'transaction_begin' => time(),
 				'transaction_end' => time() + (3600 * 24)
 			);
-
-			$data = wp_parse_args($args, $defaults);
-
-			// Eliminate all values that are not a part of the object
-			$object_vars = array_keys(get_object_vars($this));
-
-			foreach($data as $key => $val) {
-				if( $key == 'transaction_id' ) {
-					$key = 'ID';
-				}
-				if( !in_array($key, $object_vars) ) {
-					unset($data[$key]);
-				}
-			}
-
-			$needed_vals = array('user_id', 'locker_id', 'table_payment_type', 'table_price', 'table_name');
-
-			$allow_insert = true;
-			foreach($needed_vals as $val) {
-				if( !isset($data[$val]) || empty($data[$val]) ) {
-					$allow_insert = false;
-				}
-			}
-
-			if( !$allow_insert ) {
-				return false;
-			}
 
 			$result = $wpdb->insert($wpdb->prefix . 'opanda_pl_transactions', $data, array(
 				'%s', // transaction_id
@@ -211,8 +168,6 @@
 			}
 
 			if( $this->updateStatus('finish') ) {
-				$userId = (int)$this->user_id;
-
 				if( $this->table_payment_type == 'subscribe' ) {
 					$tables = onp_pl_get_pricing_tables($this->locker_id);
 
@@ -236,18 +191,27 @@
 
 					require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.paylocker-user.php');
 
-					$paylocker_user = new OnpPl_PaylockerUser($userId);
+					$paylocker_user = new OnpPl_PaylockerUser($this->user_id);
 
 					if( !$paylocker_user->addSubscribe($tableExpired, $this->locker_id) ) {
 						$this->cancel();
 						throw new Exception(__("Ошибка обновления премиум подписки.", 'plugin-paylocker'));
 					}
 				} else if( $this->table_payment_type == 'purchase' ) {
-					require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase-posts.php');
+					require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
 
-					$purchase = new OnpPl_PurchasePosts($userId);
+					$purchase = new OnpPl_Purchase(array(
+						'post_id' => $this->post_id,
+						'user_id' => $this->user_id,
+						'locker_id' => $this->locker_id,
+						'price' => $this->table_price,
+						'transaction_id' => $this->ID,
+						'purchased_date' => time()
+					));
 
-					if( !$purchase->createOrder($this->ID, $this->post_id, $this->locker_id, $this->table_price) ) {
+					$create_result = $purchase->create();
+
+					if( !$create_result ) {
 						$this->cancel();
 						throw new Exception(__("Ошибка создания покупки.", 'plugin-paylocker'));
 					}
@@ -292,13 +256,34 @@
 			if( $result_update ) {
 				wp_cache_delete($this->ID, 'paylocker_transaction');
 
-				do_action('onp_pl_transaction_status_changed', $result_update, $status, $this->ID);
+				do_action('onp_pl_transaction_status_changed', $status, $this->ID);
 
 				return true;
 			}
 
 			return false;
 		}
+
+		/**
+		 * Удаляет тещукущую транзакцию
+		 * @return false|int
+		 */
+		public function remove()
+		{
+			global $wpdb;
+
+			$result_delete = $wpdb->query($wpdb->prepare("
+					DELETE FROM " . $wpdb->prefix . self::$db_table_name . "
+					WHERE transaction_id='%s'", $this->ID));
+
+			delete_transient('onp_pl_' . static::$cache_group . '_count_');
+			delete_transient('onp_pl_' . static::$cache_group . '_count_' . $this->user_id);
+
+			do_action('onp_pl_transaction_removed', $this->ID);
+
+			return $result_delete;
+		}
+
 
 		/**
 		 * Генерирует id транзакции

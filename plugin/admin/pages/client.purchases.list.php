@@ -22,10 +22,10 @@
 			}
 			$this->id = "user_orders";
 
-			require_once PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase-posts.php';
+			require_once PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php';
 
 			$current_user = wp_get_current_user();
-			$count = OnpPl_PurchasePosts::getCount($current_user->ID);
+			$count = OnpPl_Purchase::getCounts($current_user->ID);
 
 			if( empty($count) ) {
 				$count = '0';
@@ -48,7 +48,7 @@
 				require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 			}
 
-			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.purchase-posts.table.php');
+			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.purchases.table.php');
 
 			$table = new OnpPl_PurchasedPostTable(array('screen' => 'purchased-posts'));
 			$table->prepare_items();

@@ -16,7 +16,7 @@
 		public function get_views()
 		{
 			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
-			$counts = OnpPl_Subcribe::getCountSubscribes();
+			$counts = OnpPl_Subcribe::getCounts();
 
 			$link = 'edit.php?post_type=' . OPANDA_POST_TYPE . '&page=admin_premium_subscribers-paylocker';
 
@@ -128,7 +128,7 @@
 			}
 
 			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
-			$totalitems = OnpPl_Subcribe::getCountSubscribes($user_id, $segment);
+			$totalitems = OnpPl_Subcribe::getCounts($user_id, $segment);
 
 			$perpage = 20;
 
@@ -152,9 +152,21 @@
 				"per_page" => $perpage,
 			));
 
-			$this->items = OnpPl_Subcribe::getSubscribes(array(
+			$args = array(
 				'user_id' => $user_id
-			), $segment, array('expired_begin' => 'DESC'), $perpage, $offset);
+			);
+
+			if( $segment == 'active' ) {
+				$args['expired_end'] = array('>', 'UNIX_TIMESTAMP()');
+			} else if( $segment == 'expired' ) {
+				$args['expired_end'] = array('<', 'UNIX_TIMESTAMP()');
+			}
+
+			$this->items = OnpPl_Subcribe::getItems($args, array(
+				'order' => array('expired_begin' => 'DESC'),
+				'limit' => $perpage,
+				'offset' => $offset
+			));
 		}
 
 		public function no_items()

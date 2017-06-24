@@ -1,5 +1,7 @@
 <?php
 
+	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.offers.php');
+
 	/**
 	 * Класс для работы с платными подписками
 	 *
@@ -7,7 +9,10 @@
 	 * @copyright Alex Kovalev 25.12.2016
 	 * @version 1.0
 	 */
-	class OnpPl_Subcribe {
+	class OnpPl_Subcribe extends OnpPl_Offers {
+
+		protected static $cache_group = 'subscribe';
+		protected static $db_table_name = PAYLOCKER_DB_TABLE_SUBSCRIBERS;
 
 		public $user_id;
 		public $locker_id;
@@ -36,33 +41,21 @@
 		 */
 		public function __construct($subscribe = null)
 		{
-			if( empty($subscribe) ) {
-				return;
-			}
-
-			$this->setInstance($subscribe);
+			parent::__construct($subscribe);
 
 			$this->isActive = $this->expired_end < time();
 		}
 
 		/**
-		 * Устанавливает данные подписки
-		 * @param object|array $subscribe
-		 * @throws Exception
+		 * Возвращает экземпляр текущего класса
+		 * @param $data
+		 * @return mixed
 		 */
-		public function setInstance($subscribe)
+		protected static function fromClass($data)
 		{
-			if( is_object($subscribe) ) {
-				$subscribe = get_object_vars($subscribe);
-			}
+			$classname = __CLASS__;
 
-			if( !is_array($subscribe) ) {
-				throw new Exception(__('Атрибут transaction должен быть объектом или массивом.', 'plugin-paylocker'));
-			}
-
-			foreach($subscribe as $key => $value) {
-				$this->$key = $value;
-			}
+			return new $classname($data);
 		}
 
 		/**
@@ -79,148 +72,15 @@
 				return false;
 			}
 
-			$subscribe = wp_cache_get($user_id . '-' . $locker_id, 'paylocker_subscribe');
+			$item_data = self::instanceQuery($wpdb->prepare("
+	                SELECT * FROM " . $wpdb->prefix . self::$db_table_name . "
+	                WHERE user_id = '%d' and locker_id = '%d'", $user_id, $locker_id));
 
-			if( !$subscribe ) {
-				$subscribe = $wpdb->get_row($wpdb->prepare("
-	                SELECT *
-	                FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_SUBSCRIBERS . "
-	                WHERE user_id = '%d' and locker_id = '%d'", (int)$user_id, (int)$locker_id));
-
-				if( empty($subscribe) ) {
-					return false;
-				}
-
-				wp_cache_add($user_id . '-' . $locker_id, $subscribe, 'paylocker_subscribe');
+			if( empty($item_data) ) {
+				return false;
 			}
 
-			return new OnpPl_Subcribe($subscribe);
-		}
-
-		/**
-		 * Получает экземляр пользователя, который приобрел текущую подписку
-		 * @return OnpPl_PaylockerUser
-		 */
-		public function getUser()
-		{
-			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.paylocker-user.php');
-
-			return new OnpPl_PaylockerUser($this->user_id);
-		}
-
-		public static function getCountSubscribes($user_id = null, $filter = null)
-		{
-			global $wpdb;
-
-			$counts = get_transient('onp_pl_subsribers_count_' . $user_id);
-
-			if( !$counts ) {
-				$counts = array();
-
-				$where = '';
-				if( !empty($user_id) ) {
-					$where = 'WHERE user_id=' . (int)$user_id;
-				}
-
-				$result = $wpdb->get_results("
-					  SELECT COUNT(*) AS count,
-					  IF(expired_end > UNIX_TIMESTAMP(), 'active', 'expired')
-					  AS segment
-					  FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_SUBSCRIBERS . ' ' . $where . " GROUP BY segment", ARRAY_A);
-
-				foreach($result as $items) {
-					if( $items['segment'] == 'active' ) {
-						$counts['active'] = (int)$items['count'];
-					} else {
-						$counts['expired'] = (int)$items['count'];
-					}
-				}
-
-				$counts['all'] = array_sum($counts);
-
-				set_transient('onp_pl_subsribers_count_' . $user_id, $counts, MINUTE_IN_SECONDS * 5);
-			}
-
-			if( !empty($filter) ) {
-				return isset($counts[$filter])
-					? $counts[$filter]
-					: 0;
-			}
-
-			return $counts;
-		}
-
-		/**
-		 * Получает доступные подписки пользователей
-		 * @param array $args
-		 * @param string $segment
-		 * @param array $order
-		 * @param int $limit
-		 * @param int $offset
-		 * @return mixed|void
-		 */
-		public static function getSubscribes(array $args = array(), $segment = 'all', array $order = array('expired_begin' => 'DESC'), $limit = null, $offset = null)
-		{
-			global $wpdb;
-
-			$queryString = "SELECT * ";
-			$queryString .= "FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_SUBSCRIBERS . " ";
-
-			$where = array();
-
-			if( $segment == 'active' ) {
-				$where[] = "expired_end > UNIX_TIMESTAMP() ";
-			} else if( $segment == 'expired' ) {
-				$where[] = "expired_end < UNIX_TIMESTAMP() ";
-			}
-
-			if( !empty($args) ) {
-				$allow_args = array('user_id', 'locker_id');
-
-				foreach($args as $key => $value) {
-					if( !in_array($key, $allow_args) || empty($value) ) {
-						continue;
-					}
-
-					$where[] = $key . '=' . (int)$value;
-				}
-			}
-
-			if( !empty($where) ) {
-				$queryString .= 'WHERE ' . implode(' AND ', $where) . ' ';
-			}
-
-			if( !empty($order) ) {
-				foreach($order as $order_table => $type) {
-					$queryString .= 'ORDER BY ' . $order_table . ' ' . $type . ' ';
-				}
-			}
-
-			if( !empty($limit) ) {
-				$queryString .= 'LIMIT ';
-				if( !empty($offset) ) {
-					$queryString .= (int)$offset . ', ';
-				}
-				$queryString .= (int)$limit . ' ';
-			}
-
-			$subscribes = wp_cache_get(md5($queryString), 'paylocker_subscribe');
-
-			if( !$subscribes ) {
-				$results = $wpdb->get_results($queryString, ARRAY_A);
-
-				$subscribes = array();
-
-				if( !empty($results) ) {
-					foreach($results as $key => $result) {
-						$subscribes[] = new OnpPl_Subcribe($result);
-					}
-
-					wp_cache_add(md5($queryString), $subscribes, 'paylocker_subscribe', 60);
-				}
-			}
-
-			return apply_filters('onp_pl_get_subscribes', $subscribes);
+			return new OnpPl_Subcribe($item_data);
 		}
 
 		/**
@@ -258,6 +118,21 @@
 			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 
 			return new OnpPl_Transaction($transaction);
+		}
+
+		/**
+		 * Возвращает sql запрос для получения количества покупок
+		 * @param $where
+		 * @return string
+		 */
+		public static function getCountsSql($where)
+		{
+			global $wpdb;
+
+			return "SELECT COUNT(*) AS count,
+					IF(expired_end > UNIX_TIMESTAMP(), 'active', 'expired')
+					AS segment
+					FROM " . $wpdb->prefix . self::$db_table_name . ' ' . $where . " GROUP BY segment";
 		}
 
 		/**

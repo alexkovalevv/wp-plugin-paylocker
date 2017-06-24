@@ -37,8 +37,9 @@
 
 			$columns = array(
 				'avatar' => '',
-				'price' => __('Цена', 'plugin-paylocker'),
 				'post_title' => __('Заголовок записи', 'plugin-paylocker'),
+				'transaction_id' => __('Транзакция платежа', 'plugin-paylocker'),
+				'price' => __('Цена', 'plugin-paylocker'),
 				'purchased_date' => __('Приобретен', 'plugin-paylocker')
 			);
 
@@ -66,22 +67,29 @@
 		 */
 		public function bulk_delete()
 		{
-			global $wpdb;
 			$action = $this->current_action();
+
 			if( 'delete' !== $action ) {
 				return;
 			}
 			if( empty($_POST['onp_pl_products']) ) {
 				return;
 			}
-			$ids = array();
+
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
+
 			foreach($_POST['onp_pl_products'] as $productsIds) {
 				$productsIds = explode('-', $productsIds);
+
 				if( sizeof($productsIds) !== 3 ) {
 					continue;
 				}
 
-				$wpdb->query("DELETE FROM {$wpdb->prefix}opanda_pl_purchased_posts WHERE user_id='" . $productsIds[0] . "' and locker_id='" . $productsIds[1] . "' and post_id='" . $productsIds[2] . "'");
+				$purchase = OnpPl_Purchase::getInstance($productsIds[0], $productsIds[1], $productsIds[2]);
+
+				if( $purchase && !$purchase->remove() ) {
+					wp_die(__('Неизвестная ошибка! Не удалось удалить некоторые покупки.', 'plugin-paylocker'));
+				}
 			}
 		}
 
@@ -89,28 +97,35 @@
 		{
 			global $wpdb;
 
-			$query = "SELECT * FROM {$wpdb->prefix}opanda_pl_purchased_posts";
-
 			// where
 
-			$where = array();
+			$user_id = null;
 
 			if( !current_user_can('administrator') ) {
 				$current_user = wp_get_current_user();
-				$where[] = "user_id='" . $current_user->ID . "'";
+				$user_id = $current_user->ID;
 			} else if( isset($_GET['sort']) ) {
 				if( $_GET['sort'] === 'user_id' && isset($_GET['user_id']) ) {
-					$where[] = "user_id='" . (int)$_GET['user_id'] . "'";
+					$user_id = (int)$_GET['user_id'];
 				}
 			}
 
-			if( !empty($where) ) {
-				$query .= ' WHERE ' . implode(' AND ', $where);
+			if( isset($_GET['s']) ) {
+				$search = rtrim(trim(addcslashes(esc_sql($_GET['s']), '%_')));
+
+				$result = $wpdb->get_var("SELECT ID FROM {$wpdb->prefix}users WHERE user_login='" . $search . "'");
+				if( !empty($result) ) {
+					$user_id = $result;
+				} else {
+					$this->items = array();
+
+					return;
+				}
 			}
 
-			$query .= ' ORDER BY purchased_date DESC';
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
+			$totalitems = OnpPl_Purchase::getCounts($user_id, 'all');
 
-			$totalitems = $wpdb->query($query);
 			$perpage = 20;
 
 			$paged = !empty($_GET["paged"])
@@ -121,9 +136,10 @@
 			}
 			$totalpages = ceil($totalitems / $perpage);
 
+			$offset = null;
+
 			if( !empty($paged) && !empty($perpage) ) {
 				$offset = ($paged - 1) * $perpage;
-				$query .= ' LIMIT ' . (int)$offset . ',' . (int)$perpage;
 			}
 
 			$this->set_pagination_args(array(
@@ -132,7 +148,9 @@
 				"per_page" => $perpage,
 			));
 
-			$this->items = $wpdb->get_results($query);
+			$this->items = OnpPl_Purchase::getItems(array(
+				'user_id' => $user_id,
+			), array('order' => array('purchased_date' => 'DESC'), 'limit' => $perpage, 'offset' => $offset));
 		}
 
 		/**
@@ -154,11 +172,7 @@
 		 */
 		public function column_avatar($record)
 		{
-			if( current_user_can('administrator') ) {
-				echo '<div class="onp-pl-avatar">' . get_avatar($record->user_id, 40) . '</div>';
-			} else {
-				echo '<div class="onp-pl-avatar">' . get_the_post_thumbnail($record->post_id, array(40, 40)) . '</div>';
-			}
+			echo '<div class="onp-pl-avatar">' . get_the_post_thumbnail($record->post_id, array(40, 40)) . '</div>';
 		}
 
 		/**
@@ -212,6 +226,11 @@
 			echo $output;
 		}
 
+		public function column_transaction_id($record)
+		{
+			echo $record->transaction_id;
+		}
+
 		/**
 		 * Колонка цена
 		 * @param $record
@@ -251,10 +270,25 @@
 			echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $record->purchased_date + (get_option('gmt_offset') * 3600));
 		}
 
+		/**
+		 * Колонка действий для манипуляции со списком покупок
+		 * @param $record
+		 */
 		public function column_actions($record)
 		{
 			global $paylocker;
-			echo '<a href="' . admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName) . '&action=delete&locker_id=' . $record->locker_id . '&user_id=' . $record->user_id . '&post_id=' . $record->post_id . '&transaction_id=' . $record->transaction_id . '" class="button button-default">' . __('Удалить', 'plugin-paylocker') . '</a>';
+
+			$actions_url = admin_url('edit.php?post_type=opanda-item&page=purchased_posts-' . $paylocker->pluginName) . '&action=%s&user_id=' . $record->user_id . '&locker_id=' . $record->locker_id . '&post_id=' . $record->post_id . '';
+
+			$delete_action_url = sprintf($actions_url, 'delete');
+			$edit_action_url = sprintf($actions_url, 'edit');
+
+			$button_template = '<a href="%s" class="button button-default"><i class="fa %s" aria-hidden="true"></i></a>';
+
+			$button_delete = sprintf($button_template, $delete_action_url, 'fa-trash-o');
+			$button_edit = sprintf($button_template, $edit_action_url, 'fa-pencil');
+
+			echo $button_delete . ' ' . $button_edit;
 		}
 	}
 	/*@mix:place*/

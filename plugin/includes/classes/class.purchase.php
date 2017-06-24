@@ -1,6 +1,6 @@
 <?php
 
-	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.offers.abstract.php');
+	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.offers.php');
 
 	/**
 	 * Класс отвечает за формление разовой покупки статей или страниц
@@ -18,6 +18,24 @@
 		public $price;
 		public $transaction_id;
 		public $purchased_date;
+
+		/**
+		 * Заполняет атрибуты классаs
+		 * @param object $data
+		 */
+		protected function setInstance($data)
+		{
+			$default_data = array(
+				'transaction_status' => 'waiting',
+				'transaction_begin' => time(),
+				'transaction_end' => time() + (3600 * 24)
+			);
+
+			$data = wp_parse_args($data, $default_data);
+
+			parent::setInstance($data);
+		}
+
 
 		/**
 		 * Проверяем, установлен ли атрибует, перед заполнением данных экземпляра
@@ -53,15 +71,27 @@
 		}
 
 		/**
-		 * Возвращает sql запрос для получения покупки
-		 * @return string
+		 * Возвращает экземпляр текущего класса
+		 * @param int $user_id
+		 * @param int $post_id
+		 * @return bool|OnpPl_Purchase
 		 */
-		protected static function getInstanceSql()
+		public static function getInstance($user_id, $locker_id, $post_id)
 		{
 			global $wpdb;
 
-			return "SELECT * FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_PURCHASES . "
-                	WHERE user_id = '%d' and post_id = '%d'";
+			if( empty($user_id) || empty($locker_id) || empty($post_id) ) {
+				return false;
+			}
+
+			$item_data = self::instanceQuery($wpdb->prepare("SELECT * FROM " . $wpdb->prefix . self::$db_table_name . "
+                	WHERE user_id = '%d' AND locker_id='%d' AND post_id = '%d'", $user_id, $locker_id, $post_id));
+
+			if( empty($item_data) ) {
+				return false;
+			}
+
+			return new OnpPl_Purchase($item_data);
 		}
 
 		/**
@@ -74,6 +104,79 @@
 			global $wpdb;
 
 			return "SELECT COUNT(*) AS count, 'all' AS segment
-					FROM " . $wpdb->prefix . PAYLOCKER_DB_TABLE_PURCHASES . " " . $where . " GROUP BY segment";
+					FROM " . $wpdb->prefix . self::$db_table_name . " " . $where . " GROUP BY segment";
+		}
+
+		/**
+		 * Проверяет существует ли покупка или нет.
+		 * @param $user_id
+		 * @param $post_id
+		 * @return bool
+		 */
+		public static function buyIsset($user_id, $locker_id, $post_id)
+		{
+			$purchase = self::getInstance($user_id, $locker_id, $post_id);
+
+			return !empty($purchase);
+		}
+
+		/**
+		 * Создает покупку
+		 * @return bool
+		 */
+		public function create()
+		{
+			global $wpdb;
+
+			if( self::buyIsset($this->user_id, $this->locker_id, $this->post_id) ) {
+				return true;
+			}
+
+			$result = $wpdb->insert($wpdb->prefix . self::$db_table_name, array(
+				'post_id' => $this->post_id,
+				'user_id' => $this->user_id,
+				'locker_id' => $this->locker_id,
+				'price' => $this->price,
+				'transaction_id' => $this->transaction_id,
+				'purchased_date' => time()
+			), array('%d', '%d', '%d', '%d', '%s', '%d'));
+
+			if( $result ) {
+				do_action('onp_pl_purchase_created', $this->post_id, $this->user_id, $this->locker_id);
+			}
+
+			return !empty($result);
+		}
+
+		/**
+		 * Удаляет покупку и транзакцию покупки
+		 * @return bool
+		 */
+		public function remove()
+		{
+			global $wpdb;
+
+			$result = $wpdb->query($wpdb->prepare("
+					DELETE FROM " . $wpdb->prefix . self::$db_table_name . "
+					WHERE user_id='%d' AND locker_id='%d' AND post_id='%d'", $this->user_id, $this->locker_id, $this->post_id));
+
+			if( !$result ) {
+				return false;
+			}
+
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
+
+			$transaction = OnpPl_Transaction::getInstance($this->transaction_id);
+
+			if( $transaction && !$transaction->remove() ) {
+				return false;
+			}
+
+			delete_transient('onp_pl_' . static::$cache_group . '_count_');
+			delete_transient('onp_pl_' . static::$cache_group . '_count_' . $this->user_id);
+
+			do_action('onp_pl_purchase_removed', $this->user_id, $this->locker_id, $this->post_id);
+
+			return true;
 		}
 	}

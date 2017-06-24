@@ -13,9 +13,9 @@
 	//new ADAD();
 
 	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
-	//$purchases = OnpPl_Purchase::getPurchases();
-	//$s = OnpPl_Purchase::getCount();
+	//$purchases = OnpPl_Purchase::getInstance(1, 8);
 
+	//$s = OnpPl_Purchase::getCount();
 	//$s = OnpPl_Purchase::getItems();
 
 	if( is_admin() ) {

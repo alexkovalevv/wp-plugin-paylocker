@@ -5,11 +5,11 @@
 	require(PAYLOCKER_DIR . '/plugin/admin/activation.php');
 	//require(PAYLOCKER_DIR . '/plugin/admin/pages/license-manager.php');
 	//require(SOCIALLOCKER_DIR . '/plugin/admin/notices.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-transactions-list.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-premium-subscribe-list.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/client-premium-subscribe-list.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin-purchased-posts.php');
-	require(PAYLOCKER_DIR . '/plugin/admin/pages/client-purchased-posts.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin.transactions.list.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin.subscribes.list.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/client.subscribes.list.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/admin.purchases.lists.php');
+	require(PAYLOCKER_DIR . '/plugin/admin/pages/client.purchases.list.php');
 	require(PAYLOCKER_DIR . '/plugin/admin/pages/begin-subscribe.php');
 	#endcomp
 

@@ -87,8 +87,7 @@
 				$user = wp_get_current_user();
 				$userId = $user->ID;
 				
-				$transaction = new OnpPl_Transaction();
-				$transaction_id = $transaction->create(array(
+				$transaction = new OnpPl_Transaction(array(
 					'user_id' => $userId,
 					'locker_id' => $locker_id,
 					'post_id' => $post_id,
@@ -96,6 +95,7 @@
 					'table_name' => $pricing_table_name,
 					'table_price' => $price,
 				));
+				$transaction_id = $transaction->create();
 				
 				if( empty($transaction_id) ) {
 					$error = json_encode(array('error' => __('Ошибка при создании транзакции платежа.', 'plugin-paylocker')));
@@ -161,8 +161,7 @@
 
 		// Создаем транзакцию платежа на нового или старого пользователя.
 		try {
-			$transaction = new OnpPl_Transaction();
-			$transaction_id = $transaction->create(array(
+			$transaction = new OnpPl_Transaction(array(
 				'user_id' => $userId,
 				'locker_id' => $locker_id,
 				'post_id' => $post_id,
@@ -170,6 +169,7 @@
 				'table_name' => $pricing_table_name,
 				'table_price' => $price,
 			));
+			$transaction_id = $transaction->create();
 			
 			if( empty($transaction_id) ) {
 				$error = json_encode(array('error' => __('Ошибка при создании транзакции платежа.', 'plugin-paylocker')));

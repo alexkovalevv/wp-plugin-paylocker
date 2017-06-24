@@ -22,9 +22,9 @@
 
 			$this->id = "purchased_posts";
 
-			require_once PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase-posts.php';
+			require_once PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php';
 
-			$count = OnpPl_PurchasePosts::getCount();
+			$count = OnpPl_Purchase::getCounts();
 
 			if( empty($count) ) {
 				$count = '0';
@@ -73,7 +73,7 @@
 				require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 			}
 
-			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.purchase-posts.table.php');
+			require_once(PAYLOCKER_DIR . '/plugin/admin/includes/class.purchases.table.php');
 
 			$table = new OnpPl_PurchasedPostTable(array('screen' => 'purchased-posts'));
 			$table->prepare_items();
@@ -174,69 +174,67 @@
 
 			if( isset($_POST['onp_pl_add_order']) ) {
 
-				$lockerId = isset($_POST['onp_pl_subscribe_locker'])
-					? $_POST['onp_pl_subscribe_locker']
-					: null;
-				$tableName = isset($_POST['onp_pl_table_name'])
-					? $_POST['onp_pl_table_name']
-					: null;
-				$selectedPosts = isset($_POST['onp_pl_selected_posts'])
-					? $_POST['onp_pl_selected_posts']
-					: array();
-				$userName = isset($_POST['onp_pl_user_name'])
-					? $_POST['onp_pl_user_name']
-					: null;
+				$locker_id = (int)$this->getQPost('onp_pl_subscribe_locker');
+				$table_name = $this->getQPost('onp_pl_table_name', null);
+				$selected_posts = $this->getQPost('onp_pl_selected_posts', array());
+				$user_name = $this->getQPost('onp_pl_user_name', null);
 
 				$args = array();
 
-				if( !empty($lockerId) ) {
-					$args['locker_id'] = $lockerId;
+				if( !empty($locker_id) ) {
+					$args['locker_id'] = $locker_id;
 				} else {
 					$this->throwError('locker_is_not_selected', $args);
 				}
 
-				if( empty($tableName) || $tableName == 'load' || $tableName == 'none' ) {
+				if( empty($table_name) || $table_name == 'load' || $table_name == 'none' ) {
 					$this->throwError('invalid_table_name', $args);
 				}
 
-				if( empty($selectedPosts) ) {
+				if( empty($selected_posts) ) {
 					$this->throwError('invalid_selected_posts', $args);
 				}
 
-				if( !empty($userName) ) {
-					$args['user_name'] = $userName;
+				if( !empty($user_name) ) {
+					$args['user_name'] = $user_name;
 				} else {
 					$this->throwError('invalid_user_name', $args);
 				}
 
-				$current_user = get_user_by('login', $userName);
+				$current_user = get_user_by('login', $user_name);
 
 				if( empty($current_user) ) {
 					$this->throwError('user_not_found', $args);
 				}
 
-				$pricingTable = onp_pl_get_pricing_table($lockerId, $tableName);
+				$pricingTable = onp_pl_get_pricing_table($locker_id, $table_name);
 
 				if( empty($pricingTable) ) {
 					$this->throwError('save_error', $args);
 				}
 
-				require(PAYLOCKER_DIR . '/plugin/includes/classes/class.transactions.php');
+				require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 
-				foreach($selectedPosts as $postId) {
-					$transaction = OnpPl_Transactions::beginTransaction(array(
-						'user_id' => $current_user->ID,
-						'locker_id' => $lockerId,
-						'post_id' => $postId,
-						'table_payment_type' => 'purchase',
-						'table_name' => $tableName,
-						'table_price' => $pricingTable['price']
-					));
+				foreach($selected_posts as $postId) {
+					try {
+						$transaction = new OnpPl_Transaction(array(
+							'user_id' => $current_user->ID,
+							'locker_id' => $locker_id,
+							'post_id' => $postId,
+							'table_payment_type' => 'purchase',
+							'table_name' => $table_name,
+							'table_price' => $pricingTable['price']
+						));
 
-					if( !isset($transaction['transaction_id']) || empty($transaction['transaction_id']) ) {
+						$transaction_id = $transaction->create();
+
+						if( empty($transaction_id) ) {
+							$this->throwError('save_error', $args);
+						}
+						$transaction->finish();
+					} catch( Exception $e ) {
 						$this->throwError('save_error', $args);
 					}
-					OnpPl_Transactions::finishTransaction($transaction['transaction_id']);
 				}
 
 				$this->redirectToAction('index');
@@ -270,25 +268,7 @@
 						<?php if( isset($_GET['opanda_error_code']) ): ?>
 							<div id="message" class="alert alert-danger">
 								<p>
-									<?php _e('Возникла ошибка при сохранении данных!', 'plugin-paylocker'); ?>
-									<?php if( $_GET['opanda_error_code'] == 'locker_is_not_selected' ): ?>
-										<?php _e('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'plugin-paylocker') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'invalid_table_name' ): ?>
-										<?php _e('Вы должны выбрать тарифную таблицу, чтобы создать покупку. Если она не создана, то создайте ее в настройках замка' . '.', 'plugin-paylocker') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'invalid_selected_posts' ): ?>
-										<?php _e('Вы должны выбрать, хотя бы одну запись (страницу) для оформления покупки.', 'plugin-paylocker') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'invalid_user_name' ): ?>
-										<?php _e('Вы должны заполнить поле "Имя пользователя".', 'plugin-paylocker') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'user_not_found' ): ?>
-										<?php _e('Пользователь с таким именем не найден.' . '.', 'plugin-paylocker') ?>
-									<?php endif; ?>
-									<?php if( $_GET['opanda_error_code'] == 'save_error' ): ?>
-										<?php _e('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'plugin-paylocker') ?>
-									<?php endif; ?>
+									<?php echo $this->getErrorMessage($_GET['opanda_error_code']); ?>
 								</p>
 							</div>
 						<?php endif; ?>
@@ -312,39 +292,32 @@
 
 		public function deleteAction()
 		{
-			global $wpdb;
-
-			$lockerId = isset($_GET['locker_id'])
+			$locker_id = isset($_GET['locker_id'])
 				? $_GET['locker_id']
 				: null;
-			$userId = isset($_GET['user_id'])
+			$user_id = isset($_GET['user_id'])
 				? $_GET['user_id']
 				: null;
-			$postId = isset($_GET['post_id'])
+			$post_id = isset($_GET['post_id'])
 				? $_GET['post_id']
 				: null;
-			$transactionId = isset($_GET['transaction_id'])
-				? $_GET['transaction_id']
-				: null;
 
-			if( empty($lockerId) || empty($userId) || empty($postId) || empty($transactionId) ) {
-				wp_die(__('Ошибка! Не передан один из обязательных аргументов lockerId, userId, postId, transactionId.', 'plugin-paylocker'));
+			if( empty($locker_id) || empty($user_id) || empty($post_id) ) {
+				wp_die(__('Ошибка! Не передан один из обязательных аргументов locker_id, user_id, post_id', 'plugin-paylocker'));
 				exit;
 			}
 
-			$sql = $wpdb->prepare("
-	            DELETE FROM {$wpdb->prefix}opanda_pl_purchased_posts
-	            WHERE user_id = %d and locker_id = %d and post_id = %d
-	        ", $userId, $lockerId, $postId);
+			require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.purchase.php');
+			$purchase = OnpPl_Purchase::getInstance($user_id, $locker_id, $post_id);
 
-			$wpdb->query($sql);
+			// Покупка должна существовать до удаления, если нет то выводим ошибку
+			if( empty($purchase) ) {
+				throw new Exception(__('Покупка не найдена в базе данных', 'plugin-paylocker'));
+			}
 
-			$sql = $wpdb->prepare("
-	            DELETE FROM {$wpdb->prefix}opanda_pl_transactions
-	            WHERE transaction_id = %s
-	        ", $transactionId);
-
-			$wpdb->query($sql);
+			if( $purchase && !$purchase->remove() ) {
+				wp_die(__('Неизвестная ошибка! Не удалось удалить покупку.', 'plugin-paylocker'));
+			}
 
 			$this->redirectToAction('index');
 			exit;
@@ -357,6 +330,25 @@
 			}
 			$this->redirectToAction($action, array_merge($queryArgs, array('opanda_error_code' => $errorCode)));
 			exit;
+		}
+
+		public function getErrorMessage($code)
+		{
+			$errors = array(
+				'default' => __('Возникла ошибка при сохранении данных!', 'plugin-paylocker'),
+				'locker_is_not_selected' => __('Вы должны выбрать (или создать) хотя бы один замок для оформления подписки.', 'plugin-paylocker'),
+				'invalid_table_name' => __('Вы должны выбрать тарифную таблицу, чтобы создать покупку. Если она не создана, то создайте ее в настройках замка' . '.', 'plugin-paylocker'),
+				'invalid_selected_posts' => __('Вы должны выбрать, хотя бы одну запись (страницу) для оформления покупки.', 'plugin-paylocker'),
+				'invalid_user_name' => __('Вы должны заполнить поле "Имя пользователя".', 'plugin-paylocker'),
+				'user_not_found' => __('Пользователь с таким именем не найден.' . '.', 'plugin-paylocker'),
+				'save_error' => __('Невозможно добавить подписку из-за неизвестной ошибки.' . '.', 'plugin-paylocker')
+			);
+
+			if( isset($errors[$code]) ) {
+				return $errors[$code];
+			}
+
+			return $errors['default'];
 		}
 	}
 
