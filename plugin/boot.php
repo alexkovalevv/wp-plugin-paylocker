@@ -5,6 +5,11 @@
 	require_once(PAYLOCKER_DIR . '/plugin/includes/shortcodes.php');
 	require_once(PAYLOCKER_DIR . '/plugin/includes/assets.php');
 
+	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/payment-gateways/class.paypal-standart.php');
+	//$payment = new OnpPl_PaymentGateWayPaypal('fb7e4f81-bbea-418a-af7e-b8c5070efe26');
+
+	//echo $payment->getPaymentUrl();
+
 	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.transaction.php');
 	//require_once(PAYLOCKER_DIR . '/plugin/includes/classes/class.subscribe.php');
 

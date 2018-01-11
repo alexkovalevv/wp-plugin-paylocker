@@ -6,3 +6,6 @@
 	 * @version 1.0
 	 */
 
+	require_once(PAYLOCKER_DIR . '/plugin/includes/classes/payment-gateways/class.gateways.php');
+
+
